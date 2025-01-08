@@ -1,0 +1,48 @@
+BaseConverter::xtox(a, b, s) // 将s的a进制数字转换为b进制数字
+
+struct BaseConverter
+{
+    static int charToValue(char ch)
+    {
+        if (isdigit(ch))
+            return ch - '0';
+        else if (isalpha(ch))
+            return toupper(ch) - 'A' + 10;
+        else
+            return -1;
+    }
+
+    static char valueToChar(int val)
+    {
+        if (val >= 0 && val <= 9)
+            return val + '0';
+        else if (val >= 10 && val < 36)
+            return val - 10 + 'A';
+        else
+            return '?';
+    }
+    static std::string xtox(int a, int b, const std::string &c)
+    {
+        long long value = 0;
+        for (char ch : c)
+        {
+            int digit = charToValue(ch);
+            if (digit < 0 || digit >= a)
+            {
+                throw std::invalid_argument("Error");
+            }
+            value = value * a + digit;
+        }
+        if (value == 0)
+            return "0";
+        std::string result;
+        while (value > 0)
+        {
+            int remainder = value % b;
+            result += valueToChar(remainder);
+            value /= b;
+        }
+        std::reverse(result.begin(), result.end());
+        return result;
+    }
+};

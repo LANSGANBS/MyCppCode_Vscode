@@ -1,0 +1,1 @@
+{"name":"Local: BaseConverter","url":"c:\\MyCppCode_Vscode\\Others\\BaseConverter.cpp","tests":[{"id":1733983114404,"input":"/\n10 10 2 1001 10","output":""}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"c:\\MyCppCode_Vscode\\Others\\BaseConverter.cpp","group":"local","local":true}

@@ -1,0 +1,11 @@
+// 8 = 0000 0000 0000 0000 0000 0000 0000 1000
+int n = 8;
+cout << __builtin_ctz(n) << endl;                             // 返回括号内数的二进制表示数末尾0的个数 3
+cout << __builtin_clz(n) << endl;                             // 返回括号内数的二进制表示数前导0的个数 28
+cout << __builtin_parity(n) << endl;                          // 判断括号中数的二进制表示数1的个数的奇偶性(偶数返回0 , 奇数返回0) 1
+cout << __builtin_popcount(n) << endl;                        // 返回括号内数的二进制表示数1的个数 1
+cout << __builtin_ffs(n) << endl;                             // 返回括号中数的二进制表示数的最后一个1在第几位(从后往前算) 4
+cout << __builtin_sqrt(n) << endl;                            // 快速开平方 2.82843
+cout << sizeof(x) * CHAR_BIT - __builtin_clzll(x) << endl;    // 返回括号中数的二进制表示数的位数
+cout << __builtin_ctzll(n) << endl;                           // 函数末尾加上ll 代表数据类型为long long
+int hi = 1LL << (sizeof(hi) * CHAR_BIT - __builtin_clzll(n)); // 计算不小于n的最小的2的幂

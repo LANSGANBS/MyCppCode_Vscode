@@ -1,0 +1,1 @@
+{"name":"Local: A","url":"c:\\MyCppCode_Vscode\\HRBUSTOJ\\2024FreshmanCompition2Test\\A.cpp","tests":[{"id":1731937480107,"input":"5\n1 1\n1 2\n1 3\n2 3\n1000000 1000000000","output":"1\n8\n23\n22\n354316057"}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"c:\\MyCppCode_Vscode\\HRBUSTOJ\\2024FreshmanCompition2Test\\A.cpp","group":"local","local":true}
