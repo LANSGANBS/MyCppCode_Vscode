@@ -138,21 +138,21 @@ constexpr int M = 2.01e3;
 #define debug(...) 42
 #endif
 
-int h[N];
-
 void solve() {
-  int ans;
-  int n;
-  cin >> n;
-  for (int i = 0; i < n; i++) {
-    for (int j = 0; j < n; j++) {
-      for (int k = 0; k < n; k++) {
-        ans =
-            max(ans, h[i] * h[j] * h[k] * lcm(lcm(h[i], h[j]), h[k]) /
-                         (lcm(h[i], h[j]) * lcm(h[i], h[k]) * lcm(h[j], h[k])));
+  auto dfs = [&] self(auto u, auto fa) -> auto {
+    int t = top;
+    for (int i = head[u]; i; i = nxt[i]) {
+      int v = to[i];
+      if (v != fa) {
+        self(v, u);
+        if (top - t >= B) {
+          key[++tot] = u;
+          while (top > t) bl[stk[top--]] = tot;
+        }
       }
     }
-  }
+    stk[++top] = u;
+  };
 }
 
 signed main() {
