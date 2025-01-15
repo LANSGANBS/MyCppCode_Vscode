@@ -8,6 +8,7 @@ using namespace std;
 #define pow power
 #define all(x) begin(x), end(x)
 #define mem(a, x) memset(a, x, sizeof(a))
+#define gcd(a, b) gcdint(a, b)
 #define lcm(a, b) (a / gcd(a, b) * b)
 #define sz(x) (int)x.size()
 #define lowbit(x) (x & -x)
@@ -26,8 +27,8 @@ void unsyncIO() { cin.tie(0)->sync_with_stdio(0); }
 void setPrec() { cout << fixed << setprecision(15); }
 void setIO() { unsyncIO(), setPrec(); }
 
-inline int gcd(int a, int b) { return b ? gcd(b, a % b) : a; }
-inline i128 gcd128(i128 a, i128 b) { return b ? gcd(b, a % b) : a; }
+inline int gcdint(int a, int b) { return b ? gcdint(b, a % b) : a; }
+inline i128 gcd128(i128 a, i128 b) { return b ? gcd128(b, a % b) : a; }
 inline int cdiv(int a, int b) { return a / b + ((a ^ b) > 0 && a % b); }
 inline int fdiv(int a, int b) { return a / b - ((a ^ b) < 0 && a % b); }
 
@@ -126,9 +127,9 @@ tcTU > T lstTrue(T lo, T hi, U f) {
   return lo;
 }
 
-const int mod = 1e9 + 7;
-const int inf = 0x7fffffff;
-constexpr int N = 2.01e6;
+constexpr int mod = 1e9 + 7;
+constexpr int inf = 0x7fffffff;
+constexpr int N = 1.01e6;
 constexpr int M = 2.01e3;
 
 #ifdef LOCAL
@@ -140,13 +141,20 @@ constexpr int M = 2.01e3;
 void solve() {
   int n;
   cin >> n;
-  debug(n);
+  int d = 1;
+  while (n % d == 0) {
+    d += 1;
+  }
+  for (int i = 0; i < n; i++) {
+    cout << (char)('a' + i % d);
+  }
+  cout << endl;
 }
 
 signed main() {
   setIO();
   int tt = 1;
-  // cin >> tt;
+  cin >> tt;
   while (tt--) {
     solve();
   }
