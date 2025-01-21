@@ -141,28 +141,41 @@ constexpr int M = 2.01e3;
 void solve() {
   int n;
   cin >> n;
-  string s;
-  int ans = 0;
-  while (n--) {
-    string s;
-    cin >> s;
-    int a = 0, b = 0;
-    for (auto &x : s) {
-      if (x == '0') {
-        a++;
-      } else {
-        b++;
-      }
-    }
-    ans += min(a, b);
+  vector<int> a(n);
+  for (int i = 0; i < n; i++) {
+    cin >> a[i];
   }
-  cout << ans << endl;
+  bool possible = true;
+  for (int i = 1; i < n; i++) {
+    if (a[i] < a[i - 1]) {
+      possible = false;
+      break;
+    }
+  }
+  if (possible) {
+    cout << "YES" << endl;
+    return;
+  }
+  for (int i = 1; i < n; i++) {
+    if (a[i] >= a[i - 1]) {
+      int mn = min(a[i], a[i - 1]);
+      a[i - 1] -= mn;
+      a[i] -= mn;
+    }
+  }
+  for (int i = 1; i < n; i++) {
+    if (a[i] < a[i - 1]) {
+      cout << "NO" << endl;
+      return;
+    }
+  }
+  cout << "YES" << endl;
 }
 
 signed main() {
   setIO();
   int tt = 1;
-  // cin >> tt;
+  cin >> tt;
   while (tt--) {
     solve();
   }
