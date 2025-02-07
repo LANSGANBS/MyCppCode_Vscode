@@ -138,12 +138,27 @@ constexpr int M = 2.01e3;
 #define debug(...) 42
 #endif
 
-void solve() {}
+void solve() {
+  int n;
+  cin >> n;
+  V<int> a(n), b(n);
+  cin >> a >> b;
+  set<int> sa, sb;
+  for (int i = 0; i < n; i++) {
+    sa.insert(a[i]);
+    sb.insert(b[i]);
+  }
+  if (min(sz(sa), sz(sb)) >= 2 || max(sz(sa), sz(sb)) >= 3) {
+    cout << "YES\n";
+  } else {
+    cout << "NO\n";
+  }
+}
 
 signed main() {
   setIO();
   int tt = 1;
-  // cin >> tt;
+  cin >> tt;
   while (tt--) {
     solve();
   }
