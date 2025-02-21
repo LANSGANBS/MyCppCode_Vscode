@@ -251,6 +251,12 @@ void setIO(str s = "") {
 #endif
 }
 
+#ifdef LOCAL
+#include <C:/Users/70510/Desktop/Others/algo/debug.h>
+#else
+#define debug(...) 42
+#endif
+
 ///////////////////////// TEMPLATE ABOVE //////////////////////////////////
 
 // REMEMBER
@@ -263,7 +269,16 @@ void setIO(str s = "") {
 // - Look At The Bigger Picture
 // - Don't Get Discouraged, You Can Pull It Back
 
-void solve() {}
+void solve() {
+  long double a = clock();
+  int t = 100000000;
+  int cnt = 0;
+  while (t--) {
+    cnt++;
+  }
+  long double b = clock();
+  cout << (b - a) / CLOCKS_PER_SEC << endl;
+}
 
 int main() {
   setIO();

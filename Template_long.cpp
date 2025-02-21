@@ -12,6 +12,7 @@ using namespace std;
 #define lcm(a, b) (a / gcd(a, b) * b)
 #define sz(x) (int)x.size()
 #define lowbit(x) (x & -x)
+#define time(a, b) (abs((b - a) / CLOCKS_PER_SEC))
 #define pb push_back
 #define EPS 1e-7
 #define int ll

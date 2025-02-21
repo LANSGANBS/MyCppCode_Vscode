@@ -1,137 +1,151 @@
 #include <bits/stdc++.h>
+// #include <bits/extc++.h>
 using namespace std;
-const int MAXN = 50050;
-const int BLNB = 550;
-const int COL = 1000050;
-void read(int &x) {
-  char ch;
-  while (ch = getchar(), ch < '!');
-  x = ch - 48;
-  while (ch = getchar(), ch > '!') x = (x << 3) + (x << 1) + ch - 48;
+// using namespace __gnu_pbds;
+#define endl '\n'
+#define ture true
+#define flase false
+#define pow power
+#define all(x) begin(x), end(x)
+#define mem(a, x) memset(a, x, sizeof(a))
+#define gcd(a, b) gcdint(a, b)
+#define lcm(a, b) (a / gcd(a, b) * b)
+#define sz(x) (int)x.size()
+#define lowbit(x) (x & -x)
+#define pb push_back
+#define EPS 1e-7
+#define int ll
+#define ll long long
+#define i64 long long
+#define i128 __int128
+#define fr first
+#define sc second
+#define tcT template <class T
+#define tcTU tcT, class U
+
+void unsyncIO() { cin.tie(0)->sync_with_stdio(0); }
+void setPrec() { cout << fixed << setprecision(15); }
+void setIO() { unsyncIO(), setPrec(); }
+
+inline int gcdint(int a, int b) { return b ? gcdint(b, a % b) : a; }
+inline i128 gcd128(i128 a, i128 b) { return b ? gcd128(b, a % b) : a; }
+inline int cdiv(int a, int b) { return a / b + ((a ^ b) > 0 && a % b); }
+inline int fdiv(int a, int b) { return a / b - ((a ^ b) < 0 && a % b); }
+
+tcT > using V = vector<T>;
+tcTU > using PR = pair<T, U>;
+tcTU > using MP = map<T, U>;
+tcTU > using VP = vector<pair<T, U>>;
+tcT > using pqg = priority_queue<T, vector<T>, greater<T>>;
+tcT > using pql = priority_queue<T, vector<T>, less<T>>;
+
+tcTU > istream &operator>>(istream &in, pair<T, U> &a) {
+  return in >> a.first >> a.second;
 }
-int target[MAXN];
-struct Change {
-  int p, col, las;
-} change[MAXN];
-int nc, n, m, mp[COL], tot, D, cnt[BLNB][MAXN * 2], c[MAXN], blnm, spe[BLNB];
-int CNT[MAXN * 2], ans[BLNB][BLNB], ima, tim[BLNB][BLNB], id[MAXN];
-// 细节：我们不能直接在cnt[][]上做更改，所以需要记录一个临时的变化量数组CNT[]
-// 变量解释：nc表示当前时间，mp[]和tot是离散化用的，D表示特征点步长，cnt[][]是预处理的莫队信息，id[]记录下标为i的特征点是第几个特征点，spe[]用于存储所有的特征点下标，ans[][]表示特征区间的答案，tim[][]记录答案的上一次更新时间，target[]表示离位置i最近的特征点坐标。
-inline int getc(int sl, int sr, int p) {
-  if (sl == 0 && sr == 0)
-    return 0;
-  else {
-    if (c[sl] == p)
-      return cnt[id[sr]][p] - cnt[id[sl]][p] + 1;
-    else
-      return cnt[id[sr]][p] - cnt[id[sl]][p];
-  }  // 细节：端点特判一下
-}
-// 函数作用：读取区间[sl,sr]中的莫队数组信息。
-inline void del(int pos, int sl, int sr) {
-  if ((--CNT[c[pos]]) + getc(sl, sr, c[pos]) == 0) --ima;
-}
-inline void add(int pos, int sl, int sr) {
-  if ((++CNT[c[pos]]) + getc(sl, sr, c[pos]) == 1) ++ima;
-}
-int main() {
-  read(n);
-  read(m);
-  D = pow(n, 2.0 / 3);  // 带修莫队的块大小
-  for (int i = 1; i <= n; ++i) {
-    read(c[i]);
-    if (!mp[c[i]])
-      c[i] = mp[c[i]] = ++tot;
-    else
-      c[i] = mp[c[i]];
+
+tcT > istream &operator>>(istream &in, vector<T> &a) {
+  for (auto &x : a) {
+    in >> x;
   }
-  int tmp = 1;
-  spe[blnm = 1] = 1;
-  id[1] = 1;
-  for (int i = 1; i <= n; ++i) {
-    if (i - tmp == D) tmp = i, spe[++blnm] = i, id[i] = blnm;
-    target[i] = tmp;
-  }  // 预处理特征点以及每个点对应的离它最近的特征点
-  int p = 1;
-  for (int i = 1; i <= n; ++i) {
-    ++CNT[c[i]];
-    if (i == spe[p]) {
-      for (int j = 1; j <= n; ++j) cnt[p][j] = CNT[j];
-      ++p;
-    }
-  }  // 预处理莫队所需信息
-  for (int i = 1; i <= blnm; ++i) {
-    int p = i + 1;
-    ima = 0;
-    memset(CNT, 0, sizeof CNT);
-    for (int j = spe[i]; j <= n; ++j) {
-      if ((++CNT[c[j]]) == 1) ++ima;
-      if (j == spe[p]) {
-        ans[i][p] = ima;
-        ++p;
-      }
-    }
-  }  // 预处理特征区间答案
-  memset(CNT, 0, sizeof CNT);
-  while (m--) {
-    char opt;
-    int l, r;
-    ima = 0;
-    while (opt = getchar(), opt != 'Q' && opt != 'R');
-    read(l);
-    read(r);
-    if (opt == 'R') {
-      change[++nc].p = l;
-      if (!mp[r])
-        r = mp[r] = ++tot;
-      else
-        r = mp[r];
-      change[nc].col = r;
-      change[nc].las = c[l];
-      int p = blnm;
-      for (; spe[p] >= l; --p)
-        --cnt[p][c[l]], ++cnt[p][r];  // 修改中间过程的信息
-      c[l] = r;
-    } else {
-      int sl = target[l], sr = target[r];
-      int SL = sl, SR = sr;
-      // sl、sr表示所需特征区间的左右端点。
-      if (sl == sr) {
-        for (int i = l; i <= r; ++i)
-          if (++CNT[c[i]] == 1) ++ima;
-        printf("%d\n", ima);  // 细节：区间左右端点所属特征点相同，暴力计算
-        for (int i = l; i <= r; ++i) --CNT[c[i]];
-        // 临时数组还原
-      } else {
-        for (int t = nc; t > tim[id[sl]][id[sr]]; --t) {
-          if (sl <= change[t].p && change[t].p <= sr) {
-            if (++CNT[change[t].las] + getc(sl, sr, change[t].las) == 1)
-              --ans[id[sl]][id[sr]];
-            if (--CNT[change[t].col] + getc(sl, sr, change[t].col) == 0)
-              ++ans[id[sl]][id[sr]];
-            // 反向计算答案，即把原来带修莫队的东西反过来写，详情可以参考题解里普通带修莫队的修改方式做对照。
-          }
-        }
-        for (int t = nc; t > tim[id[sl]][id[sr]]; --t)
-          if (sl <= change[t].p && change[t].p <= sr) {
-            --CNT[change[t].las];
-            ++CNT[change[t].col];
-          }
-        // 临时数组还原
-        tim[id[sl]][id[sr]] = nc;
-        ima = ans[id[sl]][id[sr]];
-        while (sl < l) del(sl++, SL, SR);
-        while (sl > l) add(--sl, SL, SR);
-        while (sr < r) add(++sr, SL, SR);
-        while (sr > r) del(sr--, SL, SR);
-        // 可爱的四句莫队
-        printf("%d\n", ima);
-        while (SL < l) add(SL++, 0, 0);
-        while (SL > l) del(--SL, 0, 0);
-        while (SR < r) del(++SR, 0, 0);
-        while (SR > r) add(SR--, 0, 0);
-        // 临时数组还原
-      }
+  return in;
+}
+
+tcTU > ostream &operator<<(ostream &out, const pair<T, U> &a) {
+  return out << a.first << ' ' << a.second;
+}
+
+tcTU > ostream &operator<<(ostream &out, const vector<pair<T, U>> &a) {
+  for (auto &x : a) {
+    out << x << endl;
+  }
+  return out;
+}
+
+tcT > ostream &operator<<(ostream &out, const vector<T> &a) {
+  int n = a.size();
+  if (!n) {
+    return out;
+  }
+  out << a[0];
+  for (int i = 1; i < n; i++) {
+    out << ' ' << a[i];
+  }
+  return out;
+}
+
+std::ostream &operator<<(std::ostream &os, i128 n) {
+  std::string s;
+  while (n) {
+    s += '0' + n % 10;
+    n /= 10;
+  }
+  std::reverse(s.begin(), s.end());
+  return os << s;
+}
+
+inline int power(int a, i64 b, int p = 1e9 + 7) {
+  int res = 1;
+  for (; b; b /= 2, a = 1LL * a * a % p) {
+    if (b % 2) {
+      res = 1LL * res * a % p;
     }
   }
+  return res;
+}
+
+tcT > bool ckmin(T &a, const T &b) { return b < a ? a = b, 1 : 0; }
+tcT > bool ckmax(T &a, const T &b) { return a < b ? a = b, 1 : 0; }
+
+tcT > void remDup(vector<T> &v) {
+  sort(all(v));
+  v.erase(unique(all(v)), end(v));
+}
+
+tcTU > void erase(T &t, const U &u) {
+  auto it = t.find(u);
+  assert(it != end(t));
+  t.erase(it);
+}
+
+tcTU > T fstTrue(T lo, T hi, U f) {
+  hi++;
+  assert(lo <= hi);
+  while (lo < hi) {
+    T mid = lo + (hi - lo) / 2;
+    f(mid) ? hi = mid : lo = mid + 1;
+  }
+  return lo;
+}
+
+tcTU > T lstTrue(T lo, T hi, U f) {
+  lo--;
+  assert(lo <= hi);
+  while (lo < hi) {
+    T mid = lo + (hi - lo + 1) / 2;
+    f(mid) ? lo = mid : hi = mid - 1;
+  }
+  return lo;
+}
+
+constexpr int mod = 1e9 + 7;
+constexpr int inf = 0x7fffffff;
+constexpr int N = 1.01e6;
+constexpr int M = 2.01e3;
+
+#ifdef LOCAL
+#include <C:/Users/70510/Desktop/Others/algo/debug.h>
+#else
+#define debug(...) 42
+#endif
+
+void solve() {}
+
+signed main() {
+  setIO();
+  int tt = 1;
+  // cin >> tt;
+  while (tt--) {
+    solve();
+  }
+  return 0;
 }
