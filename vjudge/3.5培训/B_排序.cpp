@@ -25,7 +25,7 @@ using namespace std;
 #define tcTU tcT, class U
 
 void unsyncIO() { cin.tie(0)->sync_with_stdio(0); }
-void setPrec() { cout << fixed << setprecision(6); }
+void setPrec() { cout << fixed << setprecision(15); }
 void setIO() { unsyncIO(), setPrec(); }
 
 inline int gcdint(int a, int b) { return b ? gcdint(b, a % b) : a; }
@@ -139,73 +139,87 @@ constexpr int M = 2.01e3;
 #define debug(...) 42
 #endif
 
-struct Point {
-  int x, y;
-};
+int n, m;
+bool g[M][M];
 
-void solve() {
-  int n;
-  cin >> n;
-  if (n == 5) {
-    cout << 2.414214 << endl;
-    return;
-  }
-  V<Point> pts(n);
-  for (int i = 0; i < n; i++) {
-    cin >> pts[i].x >> pts[i].y;
-  }
-  V<string> mat(n);
-  for (int i = 0; i < n; i++) {
-    cin >> mat[i];
-  }
-  V<V<double>> dist(n, V<double>(n, inf));
-  for (int i = 0; i < n; i++) {
-    dist[i][i] = 0;
-    for (int j = 0; j < n; j++) {
-      if (mat[i][j] == '1') {
-        double dx = pts[i].x - pts[j].x;
-        double dy = pts[i].y - pts[j].y;
-        double d = sqrt(dx * dx + dy * dy);
-        dist[i][j] = d;
+string topo() {
+  int indegree[M] = {0};
+  for (int u = 0; u < n; u++) {
+    for (int v = 0; v < n; v++) {
+      if (g[u][v]) {
+        indegree[v]++;
       }
     }
   }
-  for (int k = 0; k < n; k++) {
-    for (int i = 0; i < n; i++) {
-      for (int j = 0; j < n; j++) {
-        if (dist[i][k] + dist[k][j] < dist[i][j]) {
-          dist[i][j] = dist[i][k] + dist[k][j];
-          debug(dist[i][j]);
+  queue<int> q;
+  for (int i = 0; i < n; i++) {
+    if (indegree[i] == 0) {
+      q.push(i);
+    }
+  }
+  string order;
+  for (int i = 0; i < n; i++) {
+    if (q.size() > 1) {
+      return "unempty";
+    }
+    int u = q.front();
+    q.pop();
+    order.pb('A' + u);
+    for (int v = 0; v < n; v++) {
+      if (g[u][v]) {
+        indegree[v]--;
+        if (indegree[v] == 0) {
+          q.push(v);
         }
       }
     }
   }
-  debug(dist[6][5]);
-  V<double> f(n, 0);
-  for (int i = 0; i < n; i++) {
-    for (int j = 0; j < n; j++) {
-      if (dist[i][j] < inf) {
-        f[i] = max(f[i], dist[i][j]);
+  return order;
+}
+
+void solve() {
+  cin >> n >> m;
+  mem(g, 0);
+  int dtm = -1;
+  int undtm = -1;
+  for (int i = 1; i <= m; i++) {
+    string s;
+    cin >> s;
+    int u = s[0] - 'A', v = s[2] - 'A';
+    if (!g[u][v]) {
+      g[u][v] = ture;
+      for (int k = 0; k < n; k++) {
+        for (int i = 0; i < n; i++) {
+          for (int j = 0; j < n; j++) {
+            if (g[i][k] && g[k][j]) {
+              g[i][j] = ture;
+            }
+          }
+        }
       }
     }
-  }
-  double cs = 0;
-  for (int i = 0; i < n; i++) {
-    cs = max(cs, f[i]);
-  }
-  double best = inf;
-  for (int i = 0; i < n; i++) {
-    for (int j = 0; j < n; j++) {
-      if (dist[i][j] >= inf) {
-        double dx = pts[i].x - pts[j].x;
-        double dy = pts[i].y - pts[j].y;
-        double d = sqrt(dx * dx + dy * dy);
-        double sb = max(cs, f[i] + d + f[j]);
-        best = min(best, sb);
+    bool ok = false;
+    for (int i = 0; i < n; i++) {
+      if (g[i][i]) {
+        ok = ture;
+        break;
       }
     }
+    if (ok) {
+      undtm = i;
+      cout << "Inconsistency found after " << undtm << " relations." << endl;
+      return;
+    }
+    string res = topo();
+    if (res != "unempty") {
+      dtm = i;
+      s = res;
+      cout << "Sorted sequence determined after " << dtm << " relations: " << s
+           << "." << endl;
+      return;
+    }
   }
-  cout << best << endl;
+  cout << "Sorted sequence cannot be determined." << endl;
 }
 
 signed main() {

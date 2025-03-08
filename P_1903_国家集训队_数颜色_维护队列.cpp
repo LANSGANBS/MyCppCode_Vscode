@@ -5,7 +5,6 @@ using namespace std;
 #define endl '\n'
 #define ture true
 #define flase false
-#define pow power
 #define all(x) begin(x), end(x)
 #define mem(a, x) memset(a, x, sizeof(a))
 #define gcd(a, b) gcdint(a, b)
@@ -25,7 +24,7 @@ using namespace std;
 #define tcTU tcT, class U
 
 void unsyncIO() { cin.tie(0)->sync_with_stdio(0); }
-void setPrec() { cout << fixed << setprecision(6); }
+void setPrec() { cout << fixed << setprecision(15); }
 void setIO() { unsyncIO(), setPrec(); }
 
 inline int gcdint(int a, int b) { return b ? gcdint(b, a % b) : a; }
@@ -139,73 +138,117 @@ constexpr int M = 2.01e3;
 #define debug(...) 42
 #endif
 
-struct Point {
-  int x, y;
-};
+struct kkk {
+  int l;   // 左端点
+  int r;   // 右端点
+  int t;   // 此询问前修改数量
+  int id;  // 询问编号
+} q[N];
+
+// 修改操作结构体
+struct ttt {
+  int id;   // 修改位置
+  int val;  // 修改值
+} c[N];
+
+int v[N];     // 当前每个位置上的颜色（初始值读入后存入 v[]）
+int vis[N];   // 统计每个颜色在当前区间出现次数
+int sum = 0;  // 当前区间内不同颜色的数量
+
+// 宏定义 add/del （ x 为颜色值 ）
+#define add(x)                \
+  {                           \
+    if (++vis[x] == 1) sum++; \
+  }
+#define del(x)                \
+  {                           \
+    if (--vis[x] == 0) sum--; \
+  }
+
+// 全局当前区间区间边界，用于判断修改操作是否影响当前区间
+int currentL, currentR;
+
+// change 函数：对第 x 次修改操作进行“执行或撤销”
+// 注意：若修改位置在当前区间 [currentL, currentR]
+// 内，先撤销原来值的贡献，再加上修改值的贡献，最后通过 swap 更新
+void change(int x) {
+  int pos = c[x].id;  // 修改的位置
+  if (pos >= currentL && pos <= currentR) {
+    del(v[pos]);
+    add(c[x].val);
+  }
+  swap(c[x].val, v[pos]);
+}
 
 void solve() {
-  int n;
-  cin >> n;
-  if (n == 5) {
-    cout << 2.414214 << endl;
-    return;
+  int n, m;
+  cin >> n >> m;
+  for (int i = 1; i <= n; i++) {
+    cin >> v[i];
   }
-  V<Point> pts(n);
-  for (int i = 0; i < n; i++) {
-    cin >> pts[i].x >> pts[i].y;
-  }
-  V<string> mat(n);
-  for (int i = 0; i < n; i++) {
-    cin >> mat[i];
-  }
-  V<V<double>> dist(n, V<double>(n, inf));
-  for (int i = 0; i < n; i++) {
-    dist[i][i] = 0;
-    for (int j = 0; j < n; j++) {
-      if (mat[i][j] == '1') {
-        double dx = pts[i].x - pts[j].x;
-        double dy = pts[i].y - pts[j].y;
-        double d = sqrt(dx * dx + dy * dy);
-        dist[i][j] = d;
-      }
+  int totQuery = 0, totMod = 0;
+  // 按时间顺序读入操作
+  for (int i = 1; i <= m; i++) {
+    char op;
+    cin >> op;
+    if (op == 'Q') {
+      int L, R;
+      cin >> L >> R;
+      totQuery++;
+      q[totQuery].l = L;
+      q[totQuery].r = R;
+      q[totQuery].t = totMod;  // 此查询前已有 totMod 次修改
+      q[totQuery].id = totQuery;
+    } else {
+      int P, C_new;
+      cin >> P >> C_new;
+      totMod++;
+      c[totMod].id = P;
+      c[totMod].val = C_new;
     }
   }
-  for (int k = 0; k < n; k++) {
-    for (int i = 0; i < n; i++) {
-      for (int j = 0; j < n; j++) {
-        if (dist[i][k] + dist[k][j] < dist[i][j]) {
-          dist[i][j] = dist[i][k] + dist[k][j];
-          debug(dist[i][j]);
-        }
-      }
+  int blockSize = pow(n, 2.0 / 3);
+  if (blockSize == 0) blockSize = 1;
+  sort(q + 1, q + totQuery + 1, [=](const kkk &a, const kkk &b) {
+    int ablock = a.l / blockSize, bblock = b.l / blockSize;
+    if (ablock != bblock) return ablock < bblock;
+    int rblockA = a.r / blockSize, rblockB = b.r / blockSize;
+    if (rblockA != rblockB) return a.r < b.r;
+    return a.t < b.t;
+  });
+  currentL = 1, currentR = 0;
+  int currentT = 0;
+  sum = 0;
+  memset(vis, 0, sizeof(vis));
+  vector<int> res(totQuery + 1, 0);
+
+  // 依次处理每个查询
+  for (int i = 1; i <= totQuery; i++) {
+    // 调整时间（处理修改操作）
+    while (currentT < q[i].t) {
+      change(++currentT);
     }
-  }
-  debug(dist[6][5]);
-  V<double> f(n, 0);
-  for (int i = 0; i < n; i++) {
-    for (int j = 0; j < n; j++) {
-      if (dist[i][j] < inf) {
-        f[i] = max(f[i], dist[i][j]);
-      }
+    while (currentT > q[i].t) {
+      change(currentT--);
     }
-  }
-  double cs = 0;
-  for (int i = 0; i < n; i++) {
-    cs = max(cs, f[i]);
-  }
-  double best = inf;
-  for (int i = 0; i < n; i++) {
-    for (int j = 0; j < n; j++) {
-      if (dist[i][j] >= inf) {
-        double dx = pts[i].x - pts[j].x;
-        double dy = pts[i].y - pts[j].y;
-        double d = sqrt(dx * dx + dy * dy);
-        double sb = max(cs, f[i] + d + f[j]);
-        best = min(best, sb);
-      }
+    while (currentR < q[i].r) {
+      add(v[++currentR]);
     }
+    while (currentR > q[i].r) {
+      del(v[currentR--]);
+    }
+    while (currentL < q[i].l) {
+      del(v[currentL++]);
+    }
+    while (currentL > q[i].l) {
+      add(v[--currentL]);
+    }
+    // 记录当前区间答案，即不同颜色的数量
+    res[q[i].id] = sum;
   }
-  cout << best << endl;
+  for (int i = 1; i <= totQuery; i++) {
+    cout << res[i] << endl;
+  }
 }
 
 signed main() {

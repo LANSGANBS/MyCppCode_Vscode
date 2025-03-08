@@ -138,44 +138,58 @@ constexpr int M = 2.01e3;
 #define debug(...) 42
 #endif
 
-int a[N], st[N], ed[N], sum[N], add[N], len, id[N];
+int a[N];    // 存储原始数组
+int st[N];   // 记录每个块的起始位置
+int ed[N];   // 记录每个块的结束位置
+int sum[N];  // 记录每个块的元素总和
+int add[N];  // 记录每个块的懒标记（区间加法的增量）
+int len;     // 每个块的大小（sqrt(n)）
+int id[N];   // 记录每个元素所属的块号
 
+// 处理区间 [l, r] 内所有元素加 k
 void change(int l, int r, int k) {
-  if (id[l] == id[r]) {
+  if (id[l] == id[r]) {  // 若 l 和 r 在同一个块
     for (int i = l; i <= r; i++) {
-      a[i] += k;
-      sum[id[i]] += k;
+      a[i] += k;        // 更新原始数组
+      sum[id[i]] += k;  // 更新该块的总和
     }
-  } else {
+  } else {  // 若 l 和 r 在不同的块
+    // 先处理 l 所在的块（部分覆盖）
     for (int i = l; i <= ed[l]; i++) {
       a[i] += k;
       sum[id[i]] += k;
     }
+    // 处理 r 所在的块（部分覆盖）
     for (int i = st[r]; i <= r; i++) {
       a[i] += k;
       sum[id[i]] += k;
     }
+    // 处理完全被 [l, r] 包含的完整块
     for (int i = id[l] + 1; i < id[r]; i++) {
-      add[i] += k;
+      add[i] += k;  // 只修改懒标记
     }
   }
 }
 
+// 查询区间 [l, r] 内所有元素的和
 int query(int l, int r) {
   int ans = 0;
-  if (id[l] == id[r]) {
+  if (id[l] == id[r]) {  // 若 l 和 r 在同一个块
     for (int i = l; i <= r; i++) {
-      ans += a[i] + add[id[i]];
+      ans += a[i] + add[id[i]];  // 需要加上懒标记的值
     }
-  } else {
+  } else {  // 若 l 和 r 在不同的块
+    // 处理 l 所在的块（部分覆盖）
     for (int i = l; i <= ed[l]; i++) {
       ans += a[i] + add[id[i]];
     }
+    // 处理 r 所在的块（部分覆盖）
     for (int i = st[r]; i <= r; i++) {
       ans += a[i] + add[id[i]];
     }
+    // 处理完全被 [l, r] 包含的完整块
     for (int i = id[l] + 1; i < id[r]; i++) {
-      ans += sum[i] + add[i] * (ed[i] - st[i] + 1);
+      ans += sum[i] + add[i] * (ed[i] - st[i] + 1);  // 计算块和
     }
   }
   return ans;
@@ -184,14 +198,17 @@ int query(int l, int r) {
 void solve() {
   int n, m;
   cin >> n >> m;
-  len = sqrt(n);
+  len = sqrt(n);  // 计算分块大小
+
+  // 预处理分块信息
   for (int i = 1; i <= n; i++) {
     cin >> a[i];
-    id[i] = (i - 1) / len + 1;
-    st[i] = (id[i] - 1) * len + 1;
-    ed[i] = min(id[i] * len, n);
-    sum[id[i]] += a[i];
+    id[i] = (i - 1) / len + 1;      // 计算当前元素属于哪个块
+    st[i] = (id[i] - 1) * len + 1;  // 计算块的起始位置
+    ed[i] = min(id[i] * len, n);    // 计算块的结束位置
+    sum[id[i]] += a[i];             // 计算块内元素的总和
   }
+
   while (m--) {
     int op, x, y, k;
     cin >> op >> x >> y;

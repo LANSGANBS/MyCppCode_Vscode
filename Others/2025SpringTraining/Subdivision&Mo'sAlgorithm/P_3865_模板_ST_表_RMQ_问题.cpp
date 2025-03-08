@@ -138,23 +138,34 @@ constexpr int M = 2.01e3;
 #define debug(...) 42
 #endif
 
+// st[]：每个块（分块）的起始下标
+// ed[]：每个块的结束下标
+// mx[]：每个块内的最大值（用于加速区间最大值查询）
+// id[]：记录每个位置属于哪一个块（块编号）
+// a[]：存放原始数组元素
+// len：每个块的大小
 int st[N], ed[N], mx[N], id[N], a[N], len;
 
 int query() {
   int ans = 0;
   int l, r;
   cin >> l >> r;
+  // 如果查询区间 l 与 r在同一块中，直接遍历区间求最大值
   if (id[l] == id[r]) {
     for (int i = l; i <= r; i++) {
       ans = max(ans, a[i]);
     }
   } else {
+    // 分为三部分处理：
+    // 1. l 所在块中，从下标 l 到该块的结束位置 ed[id[l]]
     for (int i = l; i <= ed[id[l]]; i++) {
       ans = max(ans, a[i]);
     }
+    // 2. r 所在块中，从该块的起始位置 st[id[r]] 到 r
     for (int i = st[id[r]]; i <= r; i++) {
       ans = max(ans, a[i]);
     }
+    // 3. 中间完全被 [l, r] 包含的块，直接取每个块的预处理最大值
     for (int i = id[l] + 1; i <= id[r] - 1; i++) {
       ans = max(ans, mx[i]);
     }
@@ -167,12 +178,18 @@ void solve() {
   cin >> n >> m;
   len = sqrt(n);
   for (int i = 1; i <= n; i++) {
-    cin >> a[i];
-    id[i] = (i - 1) / len + 1;
+    cin >> a[i];                // 读入第 i 个元素
+    id[i] = (i - 1) / len + 1;  // 计算第 i 个元素所在的块编号
     st[id[i]] = (id[i] - 1) * len + 1;
+    // 记录当前块的起始下标（对于同一块，每次赋值均相同）
     ed[id[i]] = id[i] * len;
+    // 记录当前块的结束下标（可能超过 n，下文中后续处理时注意）
+    // 更新当前块的最大值：若 i 是当前块的第一个元素，则直接赋值；否则更新最大值
     mx[id[i]] = (i == st[id[i]]) ? a[i] : max(mx[id[i]], a[i]);
   }
+  // 注意：对于最后一块 ed[id] 可能超过 n，但本题数据保证 n 为正整数，
+  // 实际查询时只遍历到 n 下标即可（若需要更严谨，可加 min(ed[id], n) 判断）
+  // 处理 m 次查询操作，每次调用 query() 函数输出结果
   while (m--) {
     cout << query() << endl;
   }

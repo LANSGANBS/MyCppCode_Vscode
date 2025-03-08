@@ -25,7 +25,7 @@ using namespace std;
 #define tcTU tcT, class U
 
 void unsyncIO() { cin.tie(0)->sync_with_stdio(0); }
-void setPrec() { cout << fixed << setprecision(6); }
+void setPrec() { cout << fixed << setprecision(15); }
 void setIO() { unsyncIO(), setPrec(); }
 
 inline int gcdint(int a, int b) { return b ? gcdint(b, a % b) : a; }
@@ -139,79 +139,17 @@ constexpr int M = 2.01e3;
 #define debug(...) 42
 #endif
 
-struct Point {
-  int x, y;
-};
-
 void solve() {
-  int n;
-  cin >> n;
-  if (n == 5) {
-    cout << 2.414214 << endl;
-    return;
-  }
-  V<Point> pts(n);
-  for (int i = 0; i < n; i++) {
-    cin >> pts[i].x >> pts[i].y;
-  }
-  V<string> mat(n);
-  for (int i = 0; i < n; i++) {
-    cin >> mat[i];
-  }
-  V<V<double>> dist(n, V<double>(n, inf));
-  for (int i = 0; i < n; i++) {
-    dist[i][i] = 0;
-    for (int j = 0; j < n; j++) {
-      if (mat[i][j] == '1') {
-        double dx = pts[i].x - pts[j].x;
-        double dy = pts[i].y - pts[j].y;
-        double d = sqrt(dx * dx + dy * dy);
-        dist[i][j] = d;
-      }
-    }
-  }
-  for (int k = 0; k < n; k++) {
-    for (int i = 0; i < n; i++) {
-      for (int j = 0; j < n; j++) {
-        if (dist[i][k] + dist[k][j] < dist[i][j]) {
-          dist[i][j] = dist[i][k] + dist[k][j];
-          debug(dist[i][j]);
-        }
-      }
-    }
-  }
-  debug(dist[6][5]);
-  V<double> f(n, 0);
-  for (int i = 0; i < n; i++) {
-    for (int j = 0; j < n; j++) {
-      if (dist[i][j] < inf) {
-        f[i] = max(f[i], dist[i][j]);
-      }
-    }
-  }
-  double cs = 0;
-  for (int i = 0; i < n; i++) {
-    cs = max(cs, f[i]);
-  }
-  double best = inf;
-  for (int i = 0; i < n; i++) {
-    for (int j = 0; j < n; j++) {
-      if (dist[i][j] >= inf) {
-        double dx = pts[i].x - pts[j].x;
-        double dy = pts[i].y - pts[j].y;
-        double d = sqrt(dx * dx + dy * dy);
-        double sb = max(cs, f[i] + d + f[j]);
-        best = min(best, sb);
-      }
-    }
-  }
-  cout << best << endl;
+  int k;
+  cin >> k;
+  // 0 1 1 0 1 1
+  cout << ((k % 3 == 1) ? "YES" : "NO") << endl;
 }
 
 signed main() {
   setIO();
   int tt = 1;
-  // cin >> tt;
+  cin >> tt;
   while (tt--) {
     solve();
   }
