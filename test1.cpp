@@ -25,7 +25,7 @@ using namespace std;
 #define tcTU tcT, class U
 
 void unsyncIO() { cin.tie(0)->sync_with_stdio(0); }
-void setPrec() { cout << fixed << setprecision(6); }
+void setPrec() { cout << fixed << setprecision(15); }
 void setIO() { unsyncIO(), setPrec(); }
 
 inline int gcdint(int a, int b) { return b ? gcdint(b, a % b) : a; }
@@ -139,73 +139,77 @@ constexpr int M = 2.01e3;
 #define debug(...) 42
 #endif
 
-struct Point {
-  int x, y;
-};
+map<tuple<int, int, int>, bool> mp;
+
+bool dfs(int r, int b, int m) {
+  if (r == 0 && b == 0 && m == 0) {
+    return false;
+  }
+
+  auto state = make_tuple(r, b, m);
+  if (mp.count(state)) {
+    return mp[state];
+  }
+
+  for (int k = 1; k <= 3 && k <= r; k++) {
+    if (!dfs(r - k, b, m)) {
+      return mp[state] = true;
+    }
+  }
+
+  if (b >= 1) {
+    if (!dfs(r + 1, b - 1, m)) {
+      return mp[state] = true;
+    }
+  }
+
+  if (b >= 1) {
+    if (!dfs(r, b - 1, m)) {
+      return mp[state] = true;
+    }
+    if (r >= 1 && !dfs(r - 1, b - 1, m)) {
+      return mp[state] = true;
+    }
+  }
+
+  if (b >= 2) {
+    if (!dfs(r + 1, b - 2, m)) {
+      return mp[state] = true;
+    }
+  }
+
+  if (m >= 1) {
+    if (!dfs(r, b + 1, m - 1)) {
+      return mp[state] = true;
+    }
+  }
+
+  if (m >= 1) {
+    if (!dfs(r + 1, b, m - 1)) {
+      return mp[state] = true;
+    }
+  }
+
+  if (m >= 1) {
+    if (!dfs(r + 1, b + 1, m - 1)) {
+      return mp[state] = true;
+    }
+  }
+
+  return mp[state] = false;
+}
 
 void solve() {
-  int n;
-  cin >> n;
-  if (n == 5) {
-    cout << 2.414214 << endl;
-    return;
-  }
-  V<Point> pts(n);
-  for (int i = 0; i < n; i++) {
-    cin >> pts[i].x >> pts[i].y;
-  }
-  V<string> mat(n);
-  for (int i = 0; i < n; i++) {
-    cin >> mat[i];
-  }
-  V<V<double>> dist(n, V<double>(n, inf));
-  for (int i = 0; i < n; i++) {
-    dist[i][i] = 0;
-    for (int j = 0; j < n; j++) {
-      if (mat[i][j] == '1') {
-        double dx = pts[i].x - pts[j].x;
-        double dy = pts[i].y - pts[j].y;
-        double d = sqrt(dx * dx + dy * dy);
-        dist[i][j] = d;
+  for (int r = 0; r < 10; r++) {
+    for (int b = 0; b < 10; b++) {
+      for (int m = 0; m < 10; m++) {
+        if (r == 0 && b == 0 && m == 0) continue;
+        bool aliceWin = dfs(r, b, m);
+        cout << "r=" << r << " b=" << b << " m=" << m << " "
+             << (aliceWin ? "Alice" : "Bob") << endl;
       }
     }
   }
-  for (int k = 0; k < n; k++) {
-    for (int i = 0; i < n; i++) {
-      for (int j = 0; j < n; j++) {
-        if (dist[i][k] + dist[k][j] < dist[i][j]) {
-          dist[i][j] = dist[i][k] + dist[k][j];
-          debug(dist[i][j]);
-        }
-      }
-    }
-  }
-  debug(dist[6][5]);
-  V<double> f(n, 0);
-  for (int i = 0; i < n; i++) {
-    for (int j = 0; j < n; j++) {
-      if (dist[i][j] < inf) {
-        f[i] = max(f[i], dist[i][j]);
-      }
-    }
-  }
-  double cs = 0;
-  for (int i = 0; i < n; i++) {
-    cs = max(cs, f[i]);
-  }
-  double best = inf;
-  for (int i = 0; i < n; i++) {
-    for (int j = 0; j < n; j++) {
-      if (dist[i][j] >= inf) {
-        double dx = pts[i].x - pts[j].x;
-        double dy = pts[i].y - pts[j].y;
-        double d = sqrt(dx * dx + dy * dy);
-        double sb = max(cs, f[i] + d + f[j]);
-        best = min(best, sb);
-      }
-    }
-  }
-  cout << best << endl;
 }
 
 signed main() {

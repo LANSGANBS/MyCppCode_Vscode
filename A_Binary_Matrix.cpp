@@ -139,72 +139,34 @@ constexpr int M = 2.01e3;
 #define debug(...) 42
 #endif
 
+int n, m;
+string s;
+V<int> a(n), b(n), g[N];
+
 void solve() {
-  int n, m;
+  int i, j, k, l = 0, r = 0, x, y, z, ans = 1, res = 0, sum = 0;
   cin >> n >> m;
-  V<tuple<int, int, int>> a;
-  for (int i = 0; i < m; i++) {
-    int x, y, col;
-    cin >> x >> y >> col;
-    a.emplace_back(x, y, col);
-  }
-  V<set<PR<int, int>>> b(3 * n + 1);
-  for (int i = 1; i <= n; i++) {
-    for (int j = 1; j <= 2 * i - 1; j++) {
-      b[i].insert({i, j});
+  V<V<char>> ch(n, V<char>(m, 0));
+  for (i = 0; i < n; i++) {
+    for (j = 0; j < m; j++) {
+      cin >> ch[i][j];
     }
   }
-  for (int i = 1; i <= n; i++) {
-    int scol = i;
-    for (int j = 1; j <= n; j++) {
-      if (scol <= 2 * j - 1) {
-        b[n + i].insert({j, scol});
-      }
-      scol += 2;
+  for (i = 0; i < n; i++) {
+    bool sum = 0;
+    for (j = 0; j < m; j++) {
+      sum ^= ch[i][j] - '0';
     }
+    if (sum) r++;
   }
-  for (int i = 1; i <= n; i++) {
-    int scol = 2 * i - 1;
-    for (int j = i; j <= n; j++) {
-      b[2 * n + i].insert({j, scol});
-      scol -= 2;
-      if (scol < 1) {
-        break;
-      }
+  for (j = 0; j < m; j++) {
+    bool sum = 0;
+    for (i = 0; i < n; i++) {
+      sum ^= ch[i][j] - '0';
     }
+    if (sum) l++;
   }
-  V<set<int>> dag(3 * n + 1);
-  for (auto [x, y, col] : a) {
-    for (int i = 1; i <= 3 * n; i++) {
-      if (i != col && b[i].count({x, y})) {
-        dag[i].insert(col);
-      }
-    }
-  }
-  V<int> vis(3 * n + 1, 0);
-  bool hasCycle = false;
-  function<void(int)> dfs = [&](int n) {
-    vis[n] = 1;
-    for (auto x : dag[n]) {
-      if (vis[x] == 1) {
-        hasCycle = true;
-        return;
-      }
-      if (vis[x] == 0) {
-        dfs(x);
-      }
-    }
-    vis[n] = 2;
-  };
-  for (int i = 1; i <= 3 * n; i++) {
-    if (vis[i] == 0) {
-      dfs(i);
-      if (hasCycle) {
-        break;
-      }
-    }
-  }
-  cout << (hasCycle ? "No" : "Yes") << endl;
+  cout << max(l, r) << endl;
 }
 
 signed main() {

@@ -140,71 +140,58 @@ constexpr int M = 2.01e3;
 #endif
 
 void solve() {
-  int n, m;
-  cin >> n >> m;
-  V<tuple<int, int, int>> a;
-  for (int i = 0; i < m; i++) {
-    int x, y, col;
-    cin >> x >> y >> col;
-    a.emplace_back(x, y, col);
+  int n;
+  cin >> n;
+  V<int> a(n);
+  for (int i = 0; i < n; i++) {
+    cin >> a[i];
   }
-  V<set<PR<int, int>>> b(3 * n + 1);
-  for (int i = 1; i <= n; i++) {
-    for (int j = 1; j <= 2 * i - 1; j++) {
-      b[i].insert({i, j});
+  V<int> z;
+  for (int i = 0; i < n; i++) {
+    if (a[i] == 0) {
+      z.push_back(i);
     }
   }
-  for (int i = 1; i <= n; i++) {
-    int scol = i;
-    for (int j = 1; j <= n; j++) {
-      if (scol <= 2 * j - 1) {
-        b[n + i].insert({j, scol});
-      }
-      scol += 2;
+  unordered_map<int, V<int>> p;
+  for (int i = 0; i < n; i++) {
+    if (a[i] > 0) {
+      p[a[i]].pb(i);
     }
   }
-  for (int i = 1; i <= n; i++) {
-    int scol = 2 * i - 1;
-    for (int j = i; j <= n; j++) {
-      b[2 * n + i].insert({j, scol});
-      scol -= 2;
-      if (scol < 1) {
+  V<int> suf(n + 1, 0);
+  V<bool> seen(N, false);
+  int cnt = 0;
+  suf[n] = 0;
+  for (int i = n - 1; i >= 0; i--) {
+    int v = a[i];
+    if (v > 0 && !seen[v]) {
+      seen[v] = ture;
+      cnt++;
+    }
+    suf[i] = cnt;
+  }
+  int ans = 0;
+  for (auto &x : p) {
+    int p = x.fr;
+    auto &pos = x.sc;
+    if (sz(pos) < 2) {
+      continue;
+    }
+    sort(all(pos));
+    int so = -1;
+    for (int i = 1; i < sz(pos); i++) {
+      int prev = pos[i - 1], cur = pos[i];
+      auto it = lower_bound(all(z), prev + 1);
+      if (it != z.end() && *it < cur) {
+        so = cur;
         break;
       }
     }
-  }
-  V<set<int>> dag(3 * n + 1);
-  for (auto [x, y, col] : a) {
-    for (int i = 1; i <= 3 * n; i++) {
-      if (i != col && b[i].count({x, y})) {
-        dag[i].insert(col);
-      }
+    if (so != -1 && so < n - 1) {
+      ans += suf[so + 1];
     }
   }
-  V<int> vis(3 * n + 1, 0);
-  bool hasCycle = false;
-  function<void(int)> dfs = [&](int n) {
-    vis[n] = 1;
-    for (auto x : dag[n]) {
-      if (vis[x] == 1) {
-        hasCycle = true;
-        return;
-      }
-      if (vis[x] == 0) {
-        dfs(x);
-      }
-    }
-    vis[n] = 2;
-  };
-  for (int i = 1; i <= 3 * n; i++) {
-    if (vis[i] == 0) {
-      dfs(i);
-      if (hasCycle) {
-        break;
-      }
-    }
-  }
-  cout << (hasCycle ? "No" : "Yes") << endl;
+  cout << ans << endl;
 }
 
 signed main() {

@@ -140,71 +140,19 @@ constexpr int M = 2.01e3;
 #endif
 
 void solve() {
-  int n, m;
-  cin >> n >> m;
-  V<tuple<int, int, int>> a;
-  for (int i = 0; i < m; i++) {
-    int x, y, col;
-    cin >> x >> y >> col;
-    a.emplace_back(x, y, col);
-  }
-  V<set<PR<int, int>>> b(3 * n + 1);
-  for (int i = 1; i <= n; i++) {
-    for (int j = 1; j <= 2 * i - 1; j++) {
-      b[i].insert({i, j});
+  int r, b, m;
+  cin >> r >> b >> m;
+  if (r % 2 == 0) {
+    if (r % 4 == 2 and b % 2 == 1) {
+      cout << "Bob" << endl;
+      return;
+    }
+    if (r % 4 == 0 and b % 2 == 0) {
+      cout << "Bob" << endl;
+      return;
     }
   }
-  for (int i = 1; i <= n; i++) {
-    int scol = i;
-    for (int j = 1; j <= n; j++) {
-      if (scol <= 2 * j - 1) {
-        b[n + i].insert({j, scol});
-      }
-      scol += 2;
-    }
-  }
-  for (int i = 1; i <= n; i++) {
-    int scol = 2 * i - 1;
-    for (int j = i; j <= n; j++) {
-      b[2 * n + i].insert({j, scol});
-      scol -= 2;
-      if (scol < 1) {
-        break;
-      }
-    }
-  }
-  V<set<int>> dag(3 * n + 1);
-  for (auto [x, y, col] : a) {
-    for (int i = 1; i <= 3 * n; i++) {
-      if (i != col && b[i].count({x, y})) {
-        dag[i].insert(col);
-      }
-    }
-  }
-  V<int> vis(3 * n + 1, 0);
-  bool hasCycle = false;
-  function<void(int)> dfs = [&](int n) {
-    vis[n] = 1;
-    for (auto x : dag[n]) {
-      if (vis[x] == 1) {
-        hasCycle = true;
-        return;
-      }
-      if (vis[x] == 0) {
-        dfs(x);
-      }
-    }
-    vis[n] = 2;
-  };
-  for (int i = 1; i <= 3 * n; i++) {
-    if (vis[i] == 0) {
-      dfs(i);
-      if (hasCycle) {
-        break;
-      }
-    }
-  }
-  cout << (hasCycle ? "No" : "Yes") << endl;
+  cout << "Alice" << endl;
 }
 
 signed main() {
