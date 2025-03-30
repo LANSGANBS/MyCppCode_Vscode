@@ -1,7 +1,7 @@
-#include <bits/extc++.h>
 #include <bits/stdc++.h>
+// #include <bits/extc++.h>
 using namespace std;
-using namespace __gnu_pbds;
+// using namespace __gnu_pbds;
 #define endl '\n'
 #define ture true
 #define flase false
@@ -37,6 +37,8 @@ tcT > using V = vector<T>;
 tcTU > using PR = pair<T, U>;
 tcTU > using MP = map<T, U>;
 tcTU > using VP = vector<pair<T, U>>;
+tcT > using pqg = priority_queue<T, vector<T>, greater<T>>;
+tcT > using pql = priority_queue<T, vector<T>, less<T>>;
 
 tcTU > istream &operator>>(istream &in, pair<T, U> &a) {
   return in >> a.first >> a.second;
@@ -137,7 +139,29 @@ constexpr int M = 2.01e3;
 #define debug(...) 42
 #endif
 
-void solve() {}
+void solve() {
+  int n, m;
+  cin >> n >> m;
+  int minU = inf, maxU = -inf, minV = inf, maxV = -inf;
+  for (int i = 0; i < n; i++) {
+    int x, y;
+    cin >> x >> y;
+    int u = x + y, v = x - y;
+    minU = min(minU, u);
+    maxU = max(maxU, u);
+    minV = min(minV, v);
+    maxV = max(maxV, v);
+  }
+  int ans = inf;
+  for (int i = 0; i < m; i++) {
+    int a, b;
+    cin >> a >> b;
+    int U = a + b, V = a - b;
+    int d = max({maxU - U, U - minU, maxV - V, V - minV});
+    ans = min(ans, d);
+  }
+  cout << ans << endl;
+}
 
 signed main() {
   setIO();

@@ -1,4 +1,5 @@
-不要define int long long
+不要define int long long和define i63 long long
+不要额外const MOD
 
 using i64 = long long;
 

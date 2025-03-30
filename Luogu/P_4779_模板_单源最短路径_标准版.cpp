@@ -13,6 +13,7 @@ using namespace __gnu_pbds;
 #define sz(x) (int)x.size()
 #define lowbit(x) (x & -x)
 #define time(a, b) (abs((b - a) / CLOCKS_PER_SEC))
+// double a = clock();
 #define pb push_back
 #define EPS 1e-7
 #define int ll
@@ -37,6 +38,8 @@ tcT > using V = vector<T>;
 tcTU > using PR = pair<T, U>;
 tcTU > using MP = map<T, U>;
 tcTU > using VP = vector<pair<T, U>>;
+tcT > using pqg = std::priority_queue<T, vector<T>, greater<T>>;
+tcT > using pql = std::priority_queue<T, vector<T>, less<T>>;
 
 tcTU > istream &operator>>(istream &in, pair<T, U> &a) {
   return in >> a.first >> a.second;
@@ -137,12 +140,47 @@ constexpr int M = 2.01e3;
 #define debug(...) 42
 #endif
 
-void solve() {}
+vector<pair<int, int>> ver[N];
+
+void solve() {
+  int n, m, s;
+  cin >> n >> m >> s;
+  for (int i = 0; i < m; i++) {
+    int a, b, w;
+    cin >> a >> b >> w;
+    ver[a].push_back({b, w});
+  }
+  vector<int> dis(n + 1, 1E18);
+  auto djikstra = [&](int s) -> void {
+    using PII = pair<int, int>;
+    // std::priority_queue<PII, vector<PII>, greater<PII>> q;
+    __gnu_pbds::priority_queue<PII, greater<PII>, thin_heap_tag> q;
+    q.push({0, s});
+    dis[s] = 0;
+    vector<int> vis(n + 1);
+    while (!q.empty()) {
+      int x = q.top().second;
+      q.pop();
+      if (vis[x]) continue;
+      vis[x] = 1;
+      for (auto [y, w] : ver[x]) {
+        if (dis[y] > dis[x] + w) {
+          dis[y] = dis[x] + w;
+          q.push({dis[y], y});
+        }
+      }
+    }
+  };
+  djikstra(s);
+  for (int i = 1; i <= n; i++) {
+    cout << dis[i] << ' ';
+  }
+}
 
 signed main() {
   setIO();
   int tt = 1;
-  cin >> tt;
+  // cin >> tt;
   while (tt--) {
     solve();
   }

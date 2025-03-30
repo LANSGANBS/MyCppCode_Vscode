@@ -1,7 +1,7 @@
-#include <bits/extc++.h>
 #include <bits/stdc++.h>
+// #include <bits/extc++.h>
 using namespace std;
-using namespace __gnu_pbds;
+// using namespace __gnu_pbds;
 #define endl '\n'
 #define ture true
 #define flase false
@@ -13,10 +13,9 @@ using namespace __gnu_pbds;
 #define sz(x) (int)x.size()
 #define lowbit(x) (x & -x)
 #define time(a, b) (abs((b - a) / CLOCKS_PER_SEC))
+// double a = clock();
 #define pb push_back
 #define EPS 1e-7
-#define int ll
-#define ll long long
 #define i64 long long
 #define i128 __int128
 #define fr first
@@ -37,6 +36,8 @@ tcT > using V = vector<T>;
 tcTU > using PR = pair<T, U>;
 tcTU > using MP = map<T, U>;
 tcTU > using VP = vector<pair<T, U>>;
+tcT > using pqg = priority_queue<T, vector<T>, greater<T>>;
+tcT > using pql = priority_queue<T, vector<T>, less<T>>;
 
 tcTU > istream &operator>>(istream &in, pair<T, U> &a) {
   return in >> a.first >> a.second;
@@ -137,12 +138,122 @@ constexpr int M = 2.01e3;
 #define debug(...) 42
 #endif
 
-void solve() {}
+int n, m;
+V<int> a(N + 1);
+
+struct Node {
+  int l, r, val;
+  int lazyAnd, lazyOr, lazyXor;
+} seg[4 * N];
+
+void build(int k, int l, int r) {
+  seg[k].l = l;
+  seg[k].r = r;
+  seg[k].lazyAnd = -1;
+  seg[k].lazyOr = 0;
+  seg[k].lazyXor = 0;
+  if (l == r) {
+    seg[k].val = a[l];
+    return;
+  }
+  int mid = (l + r) / 2;
+  build(2 * k, l, mid);
+  build(2 * k + 1, mid + 1, r);
+}
+
+void apply(int k, int A, int B, int C) {
+  seg[k].val = ((seg[k].val & A) | B) ^ C;
+  seg[k].lazyAnd &= A;
+  seg[k].lazyOr = (seg[k].lazyOr & A) | B;
+  seg[k].lazyXor = (seg[k].lazyXor & A) ^ C;
+}
+
+void pushdown(int k) {
+  if (seg[k].l == seg[k].r) {
+    return;
+  }
+  int A = seg[k].lazyAnd, B = seg[k].lazyOr, C = seg[k].lazyXor;
+  if (A == -1 && B == 0 && C == 0) {
+    return;
+  }
+  apply(2 * k, A, B, C);
+  apply(2 * k + 1, A, B, C);
+  seg[k].lazyAnd = -1;
+  seg[k].lazyOr = 0;
+  seg[k].lazyXor = 0;
+}
+
+void update(int k, int L, int R, int A, int B, int C) {
+  if (L <= seg[k].l && seg[k].r <= R) {
+    apply(k, A, B, C);
+    {
+      return;
+    }
+  }
+  pushdown(k);
+  int mid = (seg[k].l + seg[k].r) / 2;
+  debug(mid);
+  if (L <= mid) {
+    update(2 * k, L, R, A, B, C);
+  }
+  if (mid < R) {
+    update(2 * k + 1, L, R, A, B, C);
+  }
+}
+
+int query(int k, int p) {
+  if (seg[k].l == seg[k].r) {
+    return seg[k].val;
+  }
+  pushdown(k);
+  int mid = (seg[k].l + seg[k].r) / 2;
+  debug(mid);
+  if (p <= mid) {
+    return query(2 * k, p);
+  } else {
+    return query(2 * k + 1, p);
+  }
+}
+
+void solve() {
+  cin >> n >> m;
+  for (int i = 1; i <= n; i++) {
+    cin >> a[i];
+  }
+  V<int> ans;
+  build(1, 1, n);
+  while (m--) {
+    int op;
+    cin >> op;
+    int l, r, x;
+    if (op == 1) {
+      cin >> l >> r >> x;
+      update(1, l, r, x, 0, 0);
+    } else if (op == 2) {
+      cin >> l >> r >> x;
+      update(1, l, r, ~x, x, 0);
+    } else if (op == 3) {
+      cin >> l >> r >> x;
+      update(1, l, r, -1, 0, x);
+    } else if (op == 4) {
+      int p;
+      cin >> p;
+      ans.pb(query(1, p));
+    }
+  }
+  for (int i = 0; i < sz(ans); i++) {
+    if (i != sz(ans) - 1) {
+      cout << ans[i] << endl;
+    } else {
+      cout << ans[i];
+    }
+  }
+}
 
 signed main() {
   setIO();
   int tt = 1;
-  cin >> tt;
+  // cin >> tt;
   while (tt--) {
     solve();
   }

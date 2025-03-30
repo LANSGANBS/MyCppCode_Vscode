@@ -1,0 +1,1 @@
+{"name":"Local: 不知所谓的机器 copy","url":"c:\\MyCppCode_Vscode\\不知所谓的机器 copy.cpp","tests":[{"id":1743304431487,"input":"5 5\n1 2 3 4 5\n1 1 3 2\n4 3\n2 1 5 3\n3 2 4 1\n4 4","output":"2\n6\n"}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"c:\\MyCppCode_Vscode\\不知所谓的机器 copy.cpp","group":"local","local":true}

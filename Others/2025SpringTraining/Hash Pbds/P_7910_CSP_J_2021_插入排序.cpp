@@ -1,7 +1,7 @@
+#include <bits/extc++.h>
 #include <bits/stdc++.h>
-// #include <bits/extc++.h>
 using namespace std;
-// using namespace __gnu_pbds;
+using namespace __gnu_pbds;
 #define endl '\n'
 #define ture true
 #define flase false
@@ -37,8 +37,6 @@ tcT > using V = vector<T>;
 tcTU > using PR = pair<T, U>;
 tcTU > using MP = map<T, U>;
 tcTU > using VP = vector<pair<T, U>>;
-tcT > using pqg = priority_queue<T, vector<T>, greater<T>>;
-tcT > using pql = priority_queue<T, vector<T>, less<T>>;
 
 tcTU > istream &operator>>(istream &in, pair<T, U> &a) {
   return in >> a.first >> a.second;
@@ -139,40 +137,34 @@ constexpr int M = 2.01e3;
 #define debug(...) 42
 #endif
 
-int n, m;
-string s;
-V<int> a(n), b(n), g[N];
+tree<int, null_type, less<int>, rb_tree_tag, tree_order_statistics_node_update>
+    rbt;
+int num[N];
 
 void solve() {
-  int i, j, k, l = 0, r = 0, x, y, z, ans = 1, res = 0, sum = 0;
-  cin >> n >> m;
-  V<V<char>> ch(n, V<char>(m, 0));
-  for (i = 0; i < n; i++) {
-    for (j = 0; j < m; j++) {
-      cin >> ch[i][j];
+  int n, q;
+  cin >> n >> q;
+  for (int i = 1; i <= n; i++) {
+    cin >> num[i];
+    rbt.insert((num[i] << 32) + i);
+  }
+  int op, x;
+  while (q--) {
+    cin >> op >> x;
+    if (op == 1) {
+      rbt.erase((num[x] << 32) + x);
+      cin >> num[x];
+      rbt.insert((num[x] << 32) + x);
+    } else {
+      cout << rbt.order_of_key(((num[x] << 32) + x) + 1) << endl;
     }
   }
-  for (i = 0; i < n; i++) {
-    bool sum = 0;
-    for (j = 0; j < m; j++) {
-      sum ^= ch[i][j] - '0';
-    }
-    if (sum) r++;
-  }
-  for (j = 0; j < m; j++) {
-    bool sum = 0;
-    for (i = 0; i < n; i++) {
-      sum ^= ch[i][j] - '0';
-    }
-    if (sum) l++;
-  }
-  cout << max(l, r) << endl;
 }
 
 signed main() {
   setIO();
   int tt = 1;
-  cin >> tt;
+  // cin >> tt;
   while (tt--) {
     solve();
   }

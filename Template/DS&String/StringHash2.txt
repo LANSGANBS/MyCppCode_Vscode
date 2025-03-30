@@ -1,0 +1,39 @@
+#define mkp make_pair
+#define ul unsigned long long
+
+template <typename tp1, typename tp2, int N>
+struct Htb {
+  static constexpr int M = 1e7 + 19;
+  int hd[M + 3], to[N], ct;
+  tp1 ed[N];
+  tp2 w[N];
+  static int hc(ul v) {
+    v ^= v << 13, v ^= v >> 7;
+    return (v ^ (v << 17)) % M;
+  }
+  void ins(tp1 x, tp2 y) {
+    int &p = hd[hc(x)];
+    ed[++ct] = x, to[ct] = p;
+    w[p = ct] = y;
+  }
+  int count(tp1 x) {
+    for (int i = hd[hc(x)]; i; i = to[i])
+      if (ed[i] == x) return 1;
+    return 0;
+  }
+  pair<tp2, bool> find(tp1 x) {
+    for (int i = hd[hc(x)]; i; i = to[i])
+      if (ed[i] == x) return mkp(w[i], true);
+    return mkp(tp2(), false);
+  }
+  int operator[](tp1 x) {
+    int &p = hd[hc(x)];
+    for (int i = p; i; i = to[i])
+      if (ed[i] == x) return i;
+    ed[++ct] = x, to[ct] = p;
+    return p = ct;
+  }
+  void clear() {
+    while (ct) hd[hc(ed[ct--])] = 0;
+  }
+};

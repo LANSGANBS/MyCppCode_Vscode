@@ -13,6 +13,7 @@ using namespace __gnu_pbds;
 #define sz(x) (int)x.size()
 #define lowbit(x) (x & -x)
 #define time(a, b) (abs((b - a) / CLOCKS_PER_SEC))
+// double a = clock();
 #define pb push_back
 #define EPS 1e-7
 #define int ll
@@ -37,6 +38,10 @@ tcT > using V = vector<T>;
 tcTU > using PR = pair<T, U>;
 tcTU > using MP = map<T, U>;
 tcTU > using VP = vector<pair<T, U>>;
+tcT > using pql =
+    __gnu_pbds::priority_queue<T, less<T>, __gnu_pbds::pairing_heap_tag>;
+tcT > using pqg =
+    __gnu_pbds::priority_queue<T, greater<T>, __gnu_pbds::pairing_heap_tag>;
 
 tcTU > istream &operator>>(istream &in, pair<T, U> &a) {
   return in >> a.first >> a.second;
@@ -137,7 +142,70 @@ constexpr int M = 2.01e3;
 #define debug(...) 42
 #endif
 
-void solve() {}
+int n, m, d[N];
+pql<int> q;
+
+void solve() {
+  cin >> n >> m;
+  for (int i = 1; i <= n; i++) {
+    d[i] = 0;
+  }
+  MP<int, V<int>> mp;
+  V<V<int>> e(n + 1);
+  for (int i = 1; i <= n; i++) {
+    int cnt;
+    cin >> cnt;
+    for (int j = 0; j < cnt; j++) {
+      int x;
+      cin >> x;
+      mp[x].pb(i);
+    }
+  }
+  for (auto [x, y] : mp) {
+    int len = y.size();
+    for (int i = 0; i < len - 1; i++) {
+      e[y[i]].pb(y[len - 1]);
+      d[y[len - 1]]++;
+    }
+  }
+  for (int i = 1; i <= n; i++) {
+    if (d[i] == 0) {
+      q.push(i);
+    }
+  }
+  V<int> ans;
+  while (sz(q)) {
+    int t = q.top();
+    q.pop();
+    ans.pb(t);
+    for (auto &x : e[t]) {
+      d[x]--;
+      if (d[x] == 0) {
+        q.push(x);
+      }
+    }
+  }
+  if (sz(ans) < n) {
+    cout << "No" << endl;
+    return;
+  }
+  bool ok = flase;
+  for (int i = 0; i < sz(ans); i++) {
+    if (ans[i] != i + 1) {
+      ok = ture;
+      break;
+    }
+  }
+  if (!ok)
+    cout << "No" << endl;
+  else {
+    cout << "Yes" << endl;
+    for (auto &x : ans) {
+      cout << x << ' ';
+    }
+    cout << endl;
+  }
+}
 
 signed main() {
   setIO();

@@ -1,7 +1,7 @@
-#include <bits/extc++.h>
 #include <bits/stdc++.h>
+// #include <bits/extc++.h>
 using namespace std;
-using namespace __gnu_pbds;
+// using namespace __gnu_pbds;
 #define endl '\n'
 #define ture true
 #define flase false
@@ -37,6 +37,8 @@ tcT > using V = vector<T>;
 tcTU > using PR = pair<T, U>;
 tcTU > using MP = map<T, U>;
 tcTU > using VP = vector<pair<T, U>>;
+tcT > using pqg = priority_queue<T, vector<T>, greater<T>>;
+tcT > using pql = priority_queue<T, vector<T>, less<T>>;
 
 tcTU > istream &operator>>(istream &in, pair<T, U> &a) {
   return in >> a.first >> a.second;
@@ -137,7 +139,42 @@ constexpr int M = 2.01e3;
 #define debug(...) 42
 #endif
 
-void solve() {}
+struct DSU {
+  vector<int> fa;
+  DSU(int n) : fa(n + 1) {
+    for (int i = 0; i <= n; i++) fa[i] = i;
+  }
+  int find(int x) { return fa[x] == x ? x : fa[x] = find(fa[x]); }
+  void merge(int x, int y) {
+    int fx = find(x), fy = find(y);
+    if (fx != fy) fa[fx] = fy;
+  }
+};
+
+void solve() {
+  int n;
+  cin >> n;
+  V<int> a(n + 1);
+  for (int i = 1; i <= n; i++) {
+    cin >> a[i];
+  }
+  DSU dsu(n);
+  for (int i = 1; i <= n; i++) {
+    int li = i - a[i];
+    int ri = i + a[i];
+    if (li >= 1) {
+      dsu.merge(li, i);
+    }
+    if (ri <= n) {
+      dsu.merge(i, ri);
+    }
+  }
+  set<int> st;
+  for (int i = 1; i <= n; i++) {
+    st.insert(dsu.find(i));
+  }
+  cout << sz(st) - 1 << endl;
+}
 
 signed main() {
   setIO();

@@ -1,7 +1,7 @@
-#include <bits/extc++.h>
 #include <bits/stdc++.h>
+// #include <bits/extc++.h>
 using namespace std;
-using namespace __gnu_pbds;
+// using namespace __gnu_pbds;
 #define endl '\n'
 #define ture true
 #define flase false
@@ -37,6 +37,8 @@ tcT > using V = vector<T>;
 tcTU > using PR = pair<T, U>;
 tcTU > using MP = map<T, U>;
 tcTU > using VP = vector<pair<T, U>>;
+tcT > using pqg = priority_queue<T, vector<T>, greater<T>>;
+tcT > using pql = priority_queue<T, vector<T>, less<T>>;
 
 tcTU > istream &operator>>(istream &in, pair<T, U> &a) {
   return in >> a.first >> a.second;
@@ -142,7 +144,7 @@ void solve() {}
 signed main() {
   setIO();
   int tt = 1;
-  cin >> tt;
+  // cin >> tt;
   while (tt--) {
     solve();
   }

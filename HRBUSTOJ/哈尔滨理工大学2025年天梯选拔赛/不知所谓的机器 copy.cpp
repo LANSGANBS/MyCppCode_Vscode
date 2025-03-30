@@ -1,7 +1,7 @@
-#include <bits/extc++.h>
 #include <bits/stdc++.h>
+// #include <bits/extc++.h>
 using namespace std;
-using namespace __gnu_pbds;
+// using namespace __gnu_pbds;
 #define endl '\n'
 #define ture true
 #define flase false
@@ -13,6 +13,7 @@ using namespace __gnu_pbds;
 #define sz(x) (int)x.size()
 #define lowbit(x) (x & -x)
 #define time(a, b) (abs((b - a) / CLOCKS_PER_SEC))
+// double a = clock();
 #define pb push_back
 #define EPS 1e-7
 #define int ll
@@ -37,6 +38,8 @@ tcT > using V = vector<T>;
 tcTU > using PR = pair<T, U>;
 tcTU > using MP = map<T, U>;
 tcTU > using VP = vector<pair<T, U>>;
+tcT > using pqg = priority_queue<T, vector<T>, greater<T>>;
+tcT > using pql = priority_queue<T, vector<T>, less<T>>;
 
 tcTU > istream &operator>>(istream &in, pair<T, U> &a) {
   return in >> a.first >> a.second;
@@ -137,12 +140,111 @@ constexpr int M = 2.01e3;
 #define debug(...) 42
 #endif
 
-void solve() {}
+inline int applyFunc(int x, int A, int B, int C) { return ((x & A) | B) ^ C; }
+
+void compose(int &lAnd, int &lOr, int &lXor, int A, int B, int C) {
+  lAnd &= A;
+  lOr = (lOr & A) | B;
+  lXor = (lXor & A) ^ C;
+}
+
+struct bb {
+  int l, r;
+  V<int> a;
+  int lazyAnd, lazyOr, lazyXor;
+};
+
+void solve() {
+  int n, m;
+  cin >> n >> m;
+  V<int> a(n + 1);
+  for (int i = 1; i <= n; i++) {
+    cin >> a[i];
+  }
+  int B = max(1ll, (int)sqrt(n));
+  int nb = (n + B - 1) / B;
+  vector<bb> b(nb);
+  for (int i = 0; i < nb; i++) {
+    int L = i * B + 1, R = min(n, (i + 1) * B);
+    b[i].l = L;
+    b[i].r = R;
+    b[i].a.resize(R - L + 1);
+    for (int j = L; j <= R; j++) {
+      b[i].a[j - L] = a[j];
+    }
+    b[i].lazyAnd = -1;
+    b[i].lazyOr = 0;
+    b[i].lazyXor = 0;
+  }
+  auto pushDown = [&](bb &a) {
+    for (auto &x : a.a) {
+      x = applyFunc(x, a.lazyAnd, a.lazyOr, a.lazyXor);
+    }
+    a.lazyAnd = -1;
+    a.lazyOr = 0;
+    a.lazyXor = 0;
+  };
+  auto updateRange = [&](int l, int r, int A, int B, int C) {
+    for (int i = 0; i < nb; i++) {
+      int L = b[i].l, R = b[i].r;
+      if (r < L || R < l) {
+        continue;
+      }
+      if (l <= L && R <= r) {
+        compose(b[i].lazyAnd, b[i].lazyOr, b[i].lazyXor, A, B, C);
+      } else {
+        pushDown(b[i]);
+        for (int j = 0; j < b[i].a.size(); j++) {
+          int pos = b[i].l + j;
+          if (l <= pos && pos <= r) {
+            b[i].a[j] = applyFunc(b[i].a[j], A, B, C);
+          }
+        }
+      }
+    }
+  };
+  auto queryPos = [&](int p) -> int {
+    for (int i = 0; i < nb; i++) {
+      if (b[i].l <= p && p <= b[i].r) {
+        int idx = p - b[i].l;
+        return applyFunc(b[i].a[idx], b[i].lazyAnd, b[i].lazyOr, b[i].lazyXor);
+      }
+    }
+    return -1;
+  };
+  V<int> ans;
+  while (m--) {
+    int op;
+    cin >> op;
+    int l, r, x;
+    if (op == 1) {
+      cin >> l >> r >> x;
+      updateRange(l, r, x, 0, 0);
+    } else if (op == 2) {
+      cin >> l >> r >> x;
+      updateRange(l, r, ~x, x, 0);
+    } else if (op == 3) {
+      cin >> l >> r >> x;
+      updateRange(l, r, -1, 0, x);
+    } else if (op == 4) {
+      int p;
+      cin >> p;
+      ans.pb(queryPos(p));
+    }
+  }
+  for (int i = 0; i < sz(ans); i++) {
+    if (i != sz(ans) - 1) {
+      cout << ans[i] << endl;
+    } else {
+      cout << ans[i];
+    }
+  }
+}
 
 signed main() {
   setIO();
   int tt = 1;
-  cin >> tt;
+  // cin >> tt;
   while (tt--) {
     solve();
   }

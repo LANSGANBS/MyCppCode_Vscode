@@ -1,7 +1,7 @@
-#include <bits/extc++.h>
 #include <bits/stdc++.h>
+// #include <bits/extc++.h>
 using namespace std;
-using namespace __gnu_pbds;
+// using namespace __gnu_pbds;
 #define endl '\n'
 #define ture true
 #define flase false
@@ -37,6 +37,8 @@ tcT > using V = vector<T>;
 tcTU > using PR = pair<T, U>;
 tcTU > using MP = map<T, U>;
 tcTU > using VP = vector<pair<T, U>>;
+tcT > using pqg = priority_queue<T, vector<T>, greater<T>>;
+tcT > using pql = priority_queue<T, vector<T>, less<T>>;
 
 tcTU > istream &operator>>(istream &in, pair<T, U> &a) {
   return in >> a.first >> a.second;
@@ -137,7 +139,75 @@ constexpr int M = 2.01e3;
 #define debug(...) 42
 #endif
 
-void solve() {}
+struct cw {
+  vector<int> c, w;
+};
+
+void solve() {
+  int n, m;
+  cin >> n >> m;
+  V<int> a(m);
+  for (int i = 0; i < m; i++) {
+    cin >> a[i];
+  }
+  V<cw> b(n);
+  for (int i = 0; i < n; i++) {
+    b[i].c.resize(m);
+    b[i].w.resize(m);
+    for (int j = 0; j < m; j++) {
+      cin >> b[i].c[j];
+    }
+    for (int j = 0; j < m; j++) {
+      cin >> b[i].w[j];
+    }
+  }
+  V<V<PR<int, int>>> dim(m);
+  for (int i = 0; i < m; i++) {
+    dim[i].resize(n);
+  }
+  vector<int> cnt(n, 0);
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < m; j++) {
+      if (a[j] < b[i].c[j]) {
+        cnt[i]++;
+      }
+      dim[j][i] = {b[i].c[j], i};
+    }
+  }
+  for (int i = 0; i < m; i++) {
+    sort(all(dim[i]), [](auto &a, auto &b) { return a.first < b.first; });
+  }
+  V<int> po(m, 0);
+  queue<int> q;
+  V<bool> pro(n, false);
+  for (int i = 0; i < n; i++) {
+    if (cnt[i] == 0) {
+      q.push(i);
+    }
+  }
+  int done = 0;
+  while (!q.empty()) {
+    int i = q.front();
+    q.pop();
+    if (pro[i]) {
+      continue;
+    }
+    pro[i] = ture;
+    done++;
+    for (int j = 0; j < m; j++) {
+      a[j] += b[i].w[j];
+      while (po[j] < n && a[j] >= dim[j][po[j]].fr) {
+        int tid = dim[j][po[j]].sc;
+        cnt[tid]--;
+        if (cnt[tid] == 0 && !pro[tid]) {
+          q.push(tid);
+        }
+        po[j]++;
+      }
+    }
+  }
+  cout << (done == n ? "YES" : "NO") << endl;
+}
 
 signed main() {
   setIO();

@@ -1,7 +1,7 @@
+#include <bits/extc++.h>
 #include <bits/stdc++.h>
-// #include <bits/extc++.h>
 using namespace std;
-// using namespace __gnu_pbds;
+using namespace __gnu_pbds;
 #define endl '\n'
 #define ture true
 #define flase false
@@ -37,8 +37,8 @@ tcT > using V = vector<T>;
 tcTU > using PR = pair<T, U>;
 tcTU > using MP = map<T, U>;
 tcTU > using VP = vector<pair<T, U>>;
-tcT > using pqg = priority_queue<T, vector<T>, greater<T>>;
-tcT > using pql = priority_queue<T, vector<T>, less<T>>;
+// tcT > using pqg = priority_queue<T, vector<T>, greater<T>>;
+// tcT > using pql = priority_queue<T, vector<T>, less<T>>;
 
 tcTU > istream &operator>>(istream &in, pair<T, U> &a) {
   return in >> a.first >> a.second;
@@ -139,83 +139,39 @@ constexpr int M = 2.01e3;
 #define debug(...) 42
 #endif
 
-map<tuple<int, int, int>, bool> mp;
-
-bool dfs(int r, int b, int m) {
-  if (r == 0 && b == 0 && m == 0) {
-    return false;
-  }
-
-  auto state = make_tuple(r, b, m);
-  if (mp.count(state)) {
-    return mp[state];
-  }
-
-  for (int k = 1; k <= 3 && k <= r; k++) {
-    if (!dfs(r - k, b, m)) {
-      return mp[state] = true;
-    }
-  }
-
-  if (b >= 1) {
-    if (!dfs(r + 1, b - 1, m)) {
-      return mp[state] = true;
-    }
-  }
-
-  if (b >= 1) {
-    if (!dfs(r, b - 1, m)) {
-      return mp[state] = true;
-    }
-    if (r >= 1 && !dfs(r - 1, b - 1, m)) {
-      return mp[state] = true;
-    }
-  }
-
-  if (b >= 2) {
-    if (!dfs(r + 1, b - 2, m)) {
-      return mp[state] = true;
-    }
-  }
-
-  if (m >= 1) {
-    if (!dfs(r, b + 1, m - 1)) {
-      return mp[state] = true;
-    }
-  }
-
-  if (m >= 1) {
-    if (!dfs(r + 1, b, m - 1)) {
-      return mp[state] = true;
-    }
-  }
-
-  if (m >= 1) {
-    if (!dfs(r + 1, b + 1, m - 1)) {
-      return mp[state] = true;
-    }
-  }
-
-  return mp[state] = false;
-}
+__gnu_pbds::priority_queue<int, less<int>, pairing_heap_tag> pq1;
+__gnu_pbds::priority_queue<int, less<int>, rc_binomial_heap_tag> pq2;
+__gnu_pbds::priority_queue<int, less<int>, thin_heap_tag> pq3;
+__gnu_pbds::priority_queue<int, less<int>, binary_heap_tag> pq4;
+__gnu_pbds::tree<int, null_type, less<int>, rb_tree_tag,
+                 tree_order_statistics_node_update>
+    tr;
 
 void solve() {
-  for (int r = 0; r < 10; r++) {
-    for (int b = 0; b < 10; b++) {
-      for (int m = 0; m < 10; m++) {
-        if (r == 0 && b == 0 && m == 0) continue;
-        bool aliceWin = dfs(r, b, m);
-        cout << "r=" << r << " b=" << b << " m=" << m << " "
-             << (aliceWin ? "Alice" : "Bob") << endl;
-      }
-    }
+  double a = clock();
+  for (int i = 1; i < N; i++) {
+    pq1.push(i);
   }
+  bool ok = 0;
+  while (!pq1.empty()) {
+    if (!ok) {
+      cout << 1 << endl;
+      ok = 1;
+    }
+    pq1.pop();
+  }
+  double b = clock();
+  cout << time(a, b) << endl;
+  cout << "thin_heap_tag = 0.405000000000000s" << ' '
+       << "binomial_heap_tag = 0.131000000000000" << ' '
+       << "pairing_heap_tag = 0.084000000000000" << ' '
+       << "binary_heap_tag = 0.483000000000000" << endl;
 }
 
 signed main() {
   setIO();
   int tt = 1;
-  // cin >> tt;
+  cin >> tt;
   while (tt--) {
     solve();
   }

@@ -13,6 +13,7 @@ using namespace std;
 #define sz(x) (int)x.size()
 #define lowbit(x) (x & -x)
 #define time(a, b) (abs((b - a) / CLOCKS_PER_SEC))
+// double a = clock();
 #define pb push_back
 #define EPS 1e-7
 #define int ll
@@ -139,16 +140,67 @@ constexpr int M = 2.01e3;
 #define debug(...) 42
 #endif
 
-int n, m;
-string s;
-V<int> a(n), b(n), g[N];
+void solve() {
+  string s;
+  cin >> s;
+  int n = s.size();
+  int cnt0 = 0, cnt1 = 0;
+  V<int> pos0;
+  for (int i = 0; i < n; i++) {
+    if (s[i] == '0') {
+      cnt0++;
+      pos0.pb(i);
+    } else {
+      cnt1++;
+    }
+  }
+  if (n % 2 == 0) {
+    if (cnt0 != cnt1) {
+      cout << -1 << endl;
+      return;
+    }
+  } else {
+    if (abs(cnt0 - cnt1) != 1) {
+      cout << -1 << endl;
+      return;
+    }
+  }
+  int ans = inf;
+  int exp = (n + 1) / 2;
+  if (cnt0 == exp) {
+    V<int> tar;
+    for (int i = 0; i < n; i += 2) {
+      tar.pb(i);
+    }
+    long long cost = 0;
+    for (int i = 0; i < sz(pos0); i++) {
+      cost += abs(pos0[i] - tar[i]);
+    }
+    ans = min(ans, cost);
+  }
+  int so = n / 2;
+  if (cnt0 == so) {
+    V<int> tar;
+    for (int i = 1; i < n; i += 2) {
+      tar.pb(i);
+    }
+    long long cost = 0;
+    for (int i = 0; i < sz(pos0); i++) {
+      cost += abs(pos0[i] - tar[i]);
+    }
+    ans = min(ans, cost);
+  }
 
-void solve() { int i, j, k, l, r, x, y, z; }
+  if (ans == 1e18)
+    cout << -1 << endl;
+  else
+    cout << ans << endl;
+}
 
 signed main() {
   setIO();
   int tt = 1;
-  // cin >> tt;
+  cin >> tt;
   while (tt--) {
     solve();
   }
