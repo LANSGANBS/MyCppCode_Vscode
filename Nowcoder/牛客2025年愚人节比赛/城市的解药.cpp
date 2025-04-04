@@ -13,6 +13,7 @@ using namespace __gnu_pbds;
 #define sz(x) (int)x.size()
 #define lowbit(x) (x & -x)
 #define time(a, b) (abs((b - a) / CLOCKS_PER_SEC))
+// double a = clock();
 #define pb push_back
 #define EPS 1e-7
 #define int ll
@@ -37,8 +38,10 @@ tcT > using V = vector<T>;
 tcTU > using PR = pair<T, U>;
 tcTU > using MP = map<T, U>;
 tcTU > using VP = vector<pair<T, U>>;
-// tcT > using pqg = priority_queue<T, vector<T>, greater<T>>;
-// tcT > using pql = priority_queue<T, vector<T>, less<T>>;
+tcT > using pql =
+    __gnu_pbds::priority_queue<T, less<T>, __gnu_pbds::pairing_heap_tag>;
+tcT > using pqg =
+    __gnu_pbds::priority_queue<T, greater<T>, __gnu_pbds::pairing_heap_tag>;
 
 tcTU > istream &operator>>(istream &in, pair<T, U> &a) {
   return in >> a.first >> a.second;
@@ -139,35 +142,7 @@ constexpr int M = 2.01e3;
 #define debug(...) 42
 #endif
 
-__gnu_pbds::priority_queue<int, less<int>, pairing_heap_tag> pq1;
-__gnu_pbds::priority_queue<int, less<int>, rc_binomial_heap_tag> pq2;
-__gnu_pbds::priority_queue<int, less<int>, thin_heap_tag> pq3;
-__gnu_pbds::priority_queue<int, less<int>, binary_heap_tag> pq4;
-__gnu_pbds::tree<int, null_type, less<int>, rb_tree_tag,
-                 tree_order_statistics_node_update>
-    tr;
-
-void solve() {
-  double a = clock();
-  for (int i = 1; i < N; i++) {
-    pq1.push(i);
-  }
-  bool ok = 0;
-  while (!pq1.empty()) {
-    if (!ok) {
-      cout << 1 << endl;
-      ok = 1;
-    }
-    pq1.pop();
-  }
-  double b = clock();
-  cout << time(a, b) << endl;
-  cout << "thin_heap_tag = 0.405000000000000s" << ' '
-       << "binomial_heap_tag = 0.131000000000000" << ' '
-       << "pairing_heap_tag = 0.084000000000000" << ' '
-       << "binary_heap_tag = 0.483000000000000" << endl;
-  cout << __cplusplus << endl;
-}
+void solve() {}
 
 signed main() {
   setIO();

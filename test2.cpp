@@ -137,12 +137,18 @@ constexpr int M = 2.01e3;
 #define debug(...) 42
 #endif
 
-void solve() {}
+void solve() {
+#if __cplusplus >= 202302L
+  std::cout << "yes C++23" << endl;
+#else
+  std::cout << "no C++23" << endl;
+#endif
+}
 
 signed main() {
   setIO();
   int tt = 1;
-  cin >> tt;
+  // cin >> tt;
   while (tt--) {
     solve();
   }
