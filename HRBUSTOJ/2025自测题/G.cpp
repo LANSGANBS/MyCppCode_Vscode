@@ -13,6 +13,7 @@ using namespace __gnu_pbds;
 #define sz(x) (int)x.size()
 #define lowbit(x) (x & -x)
 #define time(a, b) (abs((b - a) / CLOCKS_PER_SEC))
+// double a = clock();
 #define pb push_back
 #define EPS 1e-7
 #define int ll
@@ -37,6 +38,10 @@ tcT > using V = vector<T>;
 tcTU > using PR = pair<T, U>;
 tcTU > using MP = map<T, U>;
 tcTU > using VP = vector<pair<T, U>>;
+tcT > using pql =
+    __gnu_pbds::priority_queue<T, less<T>, __gnu_pbds::pairing_heap_tag>;
+tcT > using pqg =
+    __gnu_pbds::priority_queue<T, greater<T>, __gnu_pbds::pairing_heap_tag>;
 
 tcTU > istream &operator>>(istream &in, pair<T, U> &a) {
   return in >> a.first >> a.second;
@@ -137,20 +142,58 @@ constexpr int M = 2.01e3;
 #define debug(...) 42
 #endif
 
+struct Point {
+  ll x, y;
+};
+
 void solve() {
-  // unsigned int n;
-  // cin >> n;
-  // cout << popcount(n) << endl;
   int n;
-  cin >> n;
-  V<int> a(n);
-  cin >> a;
-  auto res = a | views::transform([](int n) { return n * n; }) |
-             views::filter([](int n) { return n > 10; });
-  for (auto x : res) {
-    cout << x << ' ';
+  while (cin >> n) {
+    vector<Point> pts(n);
+    for (int i = 0; i < n; i++) {
+      cin >> pts[i].x >> pts[i].y;
+    }
+    bool ok = false;
+    for (int i = 0; i < n; i++) {
+      MP<PR<int, int>, int> cnt;
+      for (int j = i + 1; j < n; j++) {
+        int dx = pts[j].x - pts[i].x;
+        int dy = pts[j].y - pts[i].y;
+        if (dx == 0 && dy == 0) {
+          continue;
+        }
+        if (dx < 0) {
+          dx = -dx;
+          dy = -dy;
+        }
+        if (dx == 0) {
+          dy = 1;
+        } else {
+          int d = gcd(abs(dx), abs(dy));
+          dx /= d;
+          dy /= d;
+        }
+        cnt[{dy, dx}]++;
+      }
+      for (auto &p : cnt) {
+        if (p.second + 1 >= 3) {
+          ok = true;
+          break;
+        }
+      }
+      if (ok) {
+        break;
+      }
+    }
+    if (ok) {
+      cout << "a is the lucky boy." << endl;
+    } else {
+      if (n % 3 != 0)
+        cout << "a is the lucky boy." << endl;
+      else
+        cout << "b is the lucky boy." << endl;
+    }
   }
-  cout << endl;
 }
 
 signed main() {

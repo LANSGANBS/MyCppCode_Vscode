@@ -13,6 +13,7 @@ using namespace __gnu_pbds;
 #define sz(x) (int)x.size()
 #define lowbit(x) (x & -x)
 #define time(a, b) (abs((b - a) / CLOCKS_PER_SEC))
+// double a = clock();
 #define pb push_back
 #define EPS 1e-7
 #define int ll
@@ -37,6 +38,10 @@ tcT > using V = vector<T>;
 tcTU > using PR = pair<T, U>;
 tcTU > using MP = map<T, U>;
 tcTU > using VP = vector<pair<T, U>>;
+tcT > using pql =
+    __gnu_pbds::priority_queue<T, less<T>, __gnu_pbds::pairing_heap_tag>;
+tcT > using pqg =
+    __gnu_pbds::priority_queue<T, greater<T>, __gnu_pbds::pairing_heap_tag>;
 
 tcTU > istream &operator>>(istream &in, pair<T, U> &a) {
   return in >> a.first >> a.second;
@@ -126,7 +131,7 @@ tcTU > T lstTrue(T lo, T hi, U f) {
   return lo;
 }
 
-constexpr int mod = 1e9 + 7;
+constexpr int mod = 10007;
 constexpr int inf = 0x7fffffff;
 constexpr int N = 1.01e6;
 constexpr int M = 2.01e3;
@@ -138,19 +143,18 @@ constexpr int M = 2.01e3;
 #endif
 
 void solve() {
-  // unsigned int n;
-  // cin >> n;
-  // cout << popcount(n) << endl;
   int n;
-  cin >> n;
-  V<int> a(n);
-  cin >> a;
-  auto res = a | views::transform([](int n) { return n * n; }) |
-             views::filter([](int n) { return n > 10; });
-  for (auto x : res) {
-    cout << x << ' ';
+  while (cin >> n) {
+    int n2 = power(2, n, mod);
+    int n_1 = (n & 1) ? mod - 1 : 1;
+    int fenzi = (((4LL * n2) % mod - n_1) % mod - 3) % mod;
+    if (fenzi < 0) {
+      fenzi += mod;
+    }
+    int inv6 = 1668;
+    int ans = (int)((1LL * fenzi * inv6) % mod);
+    cout << ans << endl;
   }
-  cout << endl;
 }
 
 signed main() {

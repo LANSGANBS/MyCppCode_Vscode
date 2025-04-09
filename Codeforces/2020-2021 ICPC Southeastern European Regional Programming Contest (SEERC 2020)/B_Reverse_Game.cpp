@@ -13,6 +13,7 @@ using namespace __gnu_pbds;
 #define sz(x) (int)x.size()
 #define lowbit(x) (x & -x)
 #define time(a, b) (abs((b - a) / CLOCKS_PER_SEC))
+// double a = clock();
 #define pb push_back
 #define EPS 1e-7
 #define int ll
@@ -37,6 +38,10 @@ tcT > using V = vector<T>;
 tcTU > using PR = pair<T, U>;
 tcTU > using MP = map<T, U>;
 tcTU > using VP = vector<pair<T, U>>;
+tcT > using pql =
+    __gnu_pbds::priority_queue<T, less<T>, __gnu_pbds::pairing_heap_tag>;
+tcT > using pqg =
+    __gnu_pbds::priority_queue<T, greater<T>, __gnu_pbds::pairing_heap_tag>;
 
 tcTU > istream &operator>>(istream &in, pair<T, U> &a) {
   return in >> a.first >> a.second;
@@ -138,19 +143,21 @@ constexpr int M = 2.01e3;
 #endif
 
 void solve() {
-  // unsigned int n;
-  // cin >> n;
-  // cout << popcount(n) << endl;
-  int n;
-  cin >> n;
-  V<int> a(n);
-  cin >> a;
-  auto res = a | views::transform([](int n) { return n * n; }) |
-             views::filter([](int n) { return n > 10; });
-  for (auto x : res) {
-    cout << x << ' ';
+  string s;
+  cin >> s;
+  int len = 0, tot = 0;
+  for (int i = 0; i < s.size(); ++i) {
+    if (s[i] == '1') {
+      len++;
+    } else {
+      tot += len;
+    }
   }
-  cout << endl;
+  if (tot % 3 == 0) {
+    cout << "Bob" << endl;
+  } else {
+    cout << "Alice" << endl;
+  }
 }
 
 signed main() {

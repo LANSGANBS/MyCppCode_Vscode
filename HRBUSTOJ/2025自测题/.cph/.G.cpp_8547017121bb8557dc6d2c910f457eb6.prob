@@ -1,0 +1,1 @@
+{"name":"Local: G","url":"c:\\MyCppCode_Vscode\\HRBUSTOJ\\2025自测题\\G.cpp","tests":[{"id":1744011740893,"input":"3\n0 0\n1 1\n2 2\n3\n0 0\n1 1\n2 3","output":"a is the lucky boy.\nb is the lucky boy."}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"c:\\MyCppCode_Vscode\\HRBUSTOJ\\2025自测题\\G.cpp","group":"local","local":true}
