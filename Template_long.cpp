@@ -8,8 +8,6 @@ using namespace __gnu_pbds;
 #define pow power
 #define all(x) begin(x), end(x)
 #define mem(a, x) memset(a, x, sizeof(a))
-#define gcd(a, b) gcdint(a, b)
-#define lcm(a, b) (a / gcd(a, b) * b)
 #define sz(x) (int)x.size()
 #define lowbit(x) (x & -x)
 #define time(a, b) (abs((b - a) / CLOCKS_PER_SEC))
@@ -29,10 +27,14 @@ void unsyncIO() { cin.tie(0)->sync_with_stdio(0); }
 void setPrec() { cout << fixed << setprecision(15); }
 void setIO() { unsyncIO(), setPrec(); }
 
-inline int gcdint(int a, int b) { return b ? gcdint(b, a % b) : a; }
-inline i128 gcd128(i128 a, i128 b) { return b ? gcd128(b, a % b) : a; }
-inline int cdiv(int a, int b) { return a / b + ((a ^ b) > 0 && a % b); }
-inline int fdiv(int a, int b) { return a / b - ((a ^ b) < 0 && a % b); }
+tcT > T gcd(const T &a, const T &b) { return b ? gcd(b, a % b) : a; }
+tcTU > T div(T a, T b, U flag) {
+  if (flag) {
+    return a / b + ((a ^ b) > 0 && a % b);
+  } else {
+    return a / b - ((a ^ b) < 0 && a % b);
+  }
+}
 
 tcT > using V = vector<T>;
 tcTU > using PR = pair<T, U>;
@@ -131,7 +133,8 @@ tcTU > T lstTrue(T lo, T hi, U f) {
   return lo;
 }
 
-constexpr int mod = 1e9 + 7;
+constexpr int modulo[] = {998244353, 1000000007};
+constexpr int mod = modulo[0];
 constexpr int inf = 0x7fffffff;
 constexpr int N = 1.01e6;
 constexpr int M = 2.01e3;

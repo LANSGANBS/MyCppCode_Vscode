@@ -133,8 +133,7 @@ tcTU > T lstTrue(T lo, T hi, U f) {
   return lo;
 }
 
-constexpr int modulo[] = {998244353, 1000000007};
-constexpr int mod = modulo[0];
+constexpr int mod = 1e9 + 7;
 constexpr int inf = 0x7fffffff;
 constexpr int N = 1.01e6;
 constexpr int M = 2.01e3;
@@ -145,89 +144,124 @@ constexpr int M = 2.01e3;
 #define debug(...) 42
 #endif
 
-using ull = unsigned long long;
-const int MOD1 = 1000000007;
-const int MOD2 = 1000000009;
-const int BASE = 91138233;
+template <class T>
+struct Segt_ {
+  struct node {
+    int l, r;
+    T w, add, mul = 1;  // 注意初始赋值
+  };
+  vector<T> w;
+  vector<node> t;
 
-int add1(int a, int b) {
-  a += b;
-  if (a >= MOD1) a -= MOD1;
-  return a;
-}
-int mul1(long long a, long long b) { return (a * b % MOD1); }
-int add2(int a, int b) {
-  a += b;
-  if (a >= MOD2) a -= MOD2;
-  return a;
-}
-int mul2(long long a, long long b) { return (a * b % MOD2); }
+  Segt_(int n) {
+    w.resize(n + 1);
+    t.resize((n << 2) + 1);
+    build(1, n);
+  }
+  Segt_(vector<int> in) {
+    int n = in.size() - 1;
+    w.resize(n + 1);
+    for (int i = 1; i <= n; i++) {
+      w[i] = in[i];
+    }
+    t.resize((n << 2) + 1);
+    build(1, n);
+  }
+  void pushdown(node &p, T add, T mul) {  // 在此更新下递函数
+    p.w = p.w * mul + (p.r - p.l + 1) * add;
+    p.add = p.add * mul + add;
+    p.mul *= mul;
+  }
+  void pushup(node &p, node &l, node &r) {  // 在此更新上传函数
+    p.w = l.w + r.w;
+  }
+#define GL (k << 1)
+#define GR (k << 1 | 1)
+  void pushdown(int k) {  // 不需要动
+    pushdown(t[GL], t[k].add, t[k].mul);
+    pushdown(t[GR], t[k].add, t[k].mul);
+    t[k].add = 0, t[k].mul = 1;
+  }
+  void pushup(int k) {  // 不需要动
+    pushup(t[k], t[GL], t[GR]);
+  }
+  void build(int l, int r, int k = 1) {
+    if (l == r) {
+      t[k] = {l, r, w[l]};
+      return;
+    }
+    t[k] = {l, r};
+    int mid = (l + r) / 2;
+    build(l, mid, GL);
+    build(mid + 1, r, GR);
+    pushup(k);
+  }
+  void modify(int l, int r, T val, int k = 1) {  // 区间修改
+    if (l <= t[k].l && t[k].r <= r) {
+      t[k].w += (t[k].r - t[k].l + 1) * val;
+      t[k].add += val;
+      return;
+    }
+    pushdown(k);
+    int mid = (t[k].l + t[k].r) / 2;
+    if (l <= mid) modify(l, r, val, GL);
+    if (mid < r) modify(l, r, val, GR);
+    pushup(k);
+  }
+  void modify2(int l, int r, T val, int k = 1) {  // 区间修改
+    if (l <= t[k].l && t[k].r <= r) {
+      t[k].w *= val;
+      t[k].add *= val;
+      t[k].mul *= val;
+      return;
+    }
+    pushdown(k);
+    int mid = (t[k].l + t[k].r) / 2;
+    if (l <= mid) modify2(l, r, val, GL);
+    if (mid < r) modify2(l, r, val, GR);
+    pushup(k);
+  }
+  T ask(int l, int r, int k = 1) {  // 区间询问，不合并
+    if (l <= t[k].l && t[k].r <= r) {
+      return t[k].w;
+    }
+    pushdown(k);
+    int mid = (t[k].l + t[k].r) / 2;
+    T ans = 0;
+    if (l <= mid) ans += ask(l, r, GL);
+    if (mid < r) ans += ask(l, r, GR);
+    return ans;
+  }
+#undef GL
+#undef GR
+};
 
 void solve() {
   int n, m;
-  string A, B;
-  cin >> n >> m >> A >> B;
-
-  V<int> pw1(m + 1), pw2(m + 1);
-  pw1[0] = pw2[0] = 1;
-  for (int i = 1; i <= m; i++) {
-    pw1[i] = mul1(pw1[i - 1], BASE);
-    pw2[i] = mul2(pw2[i - 1], BASE);
+  cin >> n >> m;
+  V<int> a(n + 1);
+  for (int i = 1; i <= n; i++) {
+    cin >> a[i];
   }
-
-  V<int> h1(m + 1, 0), h2(m + 1, 0);
-  for (int i = 0; i < m; i++) {
-    int v = (B[i] - '0') + 1;
-    h1[i + 1] = add1(mul1(h1[i], BASE), v);
-    h2[i + 1] = add2(mul2(h2[i], BASE), v);
-  }
-
-  auto getHash = [&](int p, int len) {
-    int x1 = h1[p + len] - mul1(h1[p], pw1[len]);
-    if (x1 < 0) x1 += MOD1;
-    int x2 = h2[p + len] - mul2(h2[p], pw2[len]);
-    if (x2 < 0) x2 += MOD2;
-    return PR<int, int>(x1, x2);
-  };
-
-  auto lcp = [&](int p, int q) {
-    int lo = 0, hi = n;
-    while (lo < hi) {
-      int mid = lo + hi + 1 >> 1;
-      if (getHash(p, mid) == getHash(q, mid))
-        lo = mid;
-      else
-        hi = mid - 1;
+  Segt_<int> segt(a);
+  int x, y, k;
+  char ch;
+  while (m--) {
+    cin >> ch;
+    if (ch == '1') {
+      cin >> x >> y >> k;
+      segt.modify(x, y, k);
+    } else {
+      cin >> x >> y;
+      cout << segt.ask(x, y) << endl;
     }
-    return lo;
-  };
-
-  auto better = [&](int p, int q) {
-    int l = lcp(p, q);
-    if (l >= n) {
-      return false;
-    }
-    int cp = (A[l] - '0') ^ (B[p + l] - '0');
-    int cq = (A[l] - '0') ^ (B[q + l] - '0');
-    return cp > cq;
-  };
-
-  int best = 0;
-  for (int p = 1; p <= m - n; p++) {
-    if (better(p, best)) best = p;
   }
-
-  int ans = 0;
-  for (int i = 0; i < n; i++) {
-    ans += ((A[i] - '0') ^ (B[best + i] - '0'));
-  }
-  cout << ans << endl;
 }
 
 signed main() {
   setIO();
   int tt = 1;
-  cin >> tt;
+  // cin >> tt;
   while (tt--) {
     solve();
   }

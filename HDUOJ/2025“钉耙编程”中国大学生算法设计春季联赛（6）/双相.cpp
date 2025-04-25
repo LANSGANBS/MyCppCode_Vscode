@@ -8,6 +8,8 @@ using namespace __gnu_pbds;
 #define pow power
 #define all(x) begin(x), end(x)
 #define mem(a, x) memset(a, x, sizeof(a))
+#define gcd(a, b) gcdint(a, b)
+#define lcm(a, b) (a / gcd(a, b) * b)
 #define sz(x) (int)x.size()
 #define lowbit(x) (x & -x)
 #define time(a, b) (abs((b - a) / CLOCKS_PER_SEC))
@@ -27,14 +29,10 @@ void unsyncIO() { cin.tie(0)->sync_with_stdio(0); }
 void setPrec() { cout << fixed << setprecision(15); }
 void setIO() { unsyncIO(), setPrec(); }
 
-tcT > T gcd(const T &a, const T &b) { return b ? gcd(b, a % b) : a; }
-tcTU > T div(T a, T b, U flag) {
-  if (flag) {
-    return a / b + ((a ^ b) > 0 && a % b);
-  } else {
-    return a / b - ((a ^ b) < 0 && a % b);
-  }
-}
+inline int gcdint(int a, int b) { return b ? gcdint(b, a % b) : a; }
+inline i128 gcd128(i128 a, i128 b) { return b ? gcd128(b, a % b) : a; }
+inline int cdiv(int a, int b) { return a / b + ((a ^ b) > 0 && a % b); }
+inline int fdiv(int a, int b) { return a / b - ((a ^ b) < 0 && a % b); }
 
 tcT > using V = vector<T>;
 tcTU > using PR = pair<T, U>;
@@ -133,8 +131,7 @@ tcTU > T lstTrue(T lo, T hi, U f) {
   return lo;
 }
 
-constexpr int modulo[] = {998244353, 1000000007};
-constexpr int mod = modulo[0];
+constexpr int mod = 1e9 + 7;
 constexpr int inf = 0x7fffffff;
 constexpr int N = 1.01e6;
 constexpr int M = 2.01e3;
@@ -145,81 +142,42 @@ constexpr int M = 2.01e3;
 #define debug(...) 42
 #endif
 
-using ull = unsigned long long;
-const int MOD1 = 1000000007;
-const int MOD2 = 1000000009;
-const int BASE = 91138233;
-
-int add1(int a, int b) {
-  a += b;
-  if (a >= MOD1) a -= MOD1;
-  return a;
-}
-int mul1(long long a, long long b) { return (a * b % MOD1); }
-int add2(int a, int b) {
-  a += b;
-  if (a >= MOD2) a -= MOD2;
-  return a;
-}
-int mul2(long long a, long long b) { return (a * b % MOD2); }
-
 void solve() {
-  int n, m;
-  string A, B;
-  cin >> n >> m >> A >> B;
-
-  V<int> pw1(m + 1), pw2(m + 1);
-  pw1[0] = pw2[0] = 1;
-  for (int i = 1; i <= m; i++) {
-    pw1[i] = mul1(pw1[i - 1], BASE);
-    pw2[i] = mul2(pw2[i - 1], BASE);
-  }
-
-  V<int> h1(m + 1, 0), h2(m + 1, 0);
-  for (int i = 0; i < m; i++) {
-    int v = (B[i] - '0') + 1;
-    h1[i + 1] = add1(mul1(h1[i], BASE), v);
-    h2[i + 1] = add2(mul2(h2[i], BASE), v);
-  }
-
-  auto getHash = [&](int p, int len) {
-    int x1 = h1[p + len] - mul1(h1[p], pw1[len]);
-    if (x1 < 0) x1 += MOD1;
-    int x2 = h2[p + len] - mul2(h2[p], pw2[len]);
-    if (x2 < 0) x2 += MOD2;
-    return PR<int, int>(x1, x2);
-  };
-
-  auto lcp = [&](int p, int q) {
-    int lo = 0, hi = n;
-    while (lo < hi) {
-      int mid = lo + hi + 1 >> 1;
-      if (getHash(p, mid) == getHash(q, mid))
-        lo = mid;
-      else
-        hi = mid - 1;
-    }
-    return lo;
-  };
-
-  auto better = [&](int p, int q) {
-    int l = lcp(p, q);
-    if (l >= n) {
-      return false;
-    }
-    int cp = (A[l] - '0') ^ (B[p + l] - '0');
-    int cq = (A[l] - '0') ^ (B[q + l] - '0');
-    return cp > cq;
-  };
-
-  int best = 0;
-  for (int p = 1; p <= m - n; p++) {
-    if (better(p, best)) best = p;
-  }
-
-  int ans = 0;
+  int n;
+  cin >> n;
+  V<int> r, b, a(n);
   for (int i = 0; i < n; i++) {
-    ans += ((A[i] - '0') ^ (B[best + i] - '0'));
+    cin >> a[i];
+  }
+  string s;
+  cin >> s;
+  for (int i = 0; i < n; i++) {
+    if (s[i] == 'R') {
+      r.pb(a[i]);
+    } else {
+      b.pb(a[i]);
+    }
+  }
+  sort(all(r), greater<int>());
+  sort(all(b), greater<int>());
+  int ans = 0;
+  int cntr = sz(r), cntb = sz(b);
+  if (cntr > cntb) {
+    int tkr = cntb + 1;
+    for (int i = 0; i < tkr and i < cntr; i++) {
+      ans += r[i];
+    }
+    for (int i = 0; i < cntb; i++) {
+      ans += b[i];
+    }
+  } else {
+    int tk = cntr;
+    for (int i = 0; i < tk; i++) {
+      ans += r[i];
+    }
+    for (int i = 0; i < tk and i < cntb; i++) {
+      ans += b[i];
+    }
   }
   cout << ans << endl;
 }

@@ -145,81 +145,35 @@ constexpr int M = 2.01e3;
 #define debug(...) 42
 #endif
 
-using ull = unsigned long long;
-const int MOD1 = 1000000007;
-const int MOD2 = 1000000009;
-const int BASE = 91138233;
+const int LCM = 48;
 
-int add1(int a, int b) {
-  a += b;
-  if (a >= MOD1) a -= MOD1;
-  return a;
-}
-int mul1(long long a, long long b) { return (a * b % MOD1); }
-int add2(int a, int b) {
-  a += b;
-  if (a >= MOD2) a -= MOD2;
-  return a;
-}
-int mul2(long long a, long long b) { return (a * b % MOD2); }
+tree<int, null_type, less<int>, rb_tree_tag, tree_order_statistics_node_update>
+    tr11, tr2;
 
 void solve() {
-  int n, m;
-  string A, B;
-  cin >> n >> m >> A >> B;
-
-  V<int> pw1(m + 1), pw2(m + 1);
-  pw1[0] = pw2[0] = 1;
-  for (int i = 1; i <= m; i++) {
-    pw1[i] = mul1(pw1[i - 1], BASE);
-    pw2[i] = mul2(pw2[i - 1], BASE);
+  int n1, n2;
+  cin >> n1 >> n2;
+  int cur = 0;
+  tr11.clear();
+  tr2.clear();
+  for (int i = 0; i < n1; ++i) {
+    int p, q;
+    cin >> p >> q;
+    tr11.insert(cur);
+    cur += p * (LCM / q);
   }
-
-  V<int> h1(m + 1, 0), h2(m + 1, 0);
-  for (int i = 0; i < m; i++) {
-    int v = (B[i] - '0') + 1;
-    h1[i + 1] = add1(mul1(h1[i], BASE), v);
-    h2[i + 1] = add2(mul2(h2[i], BASE), v);
+  cur = 0;
+  for (int i = 0; i < n2; ++i) {
+    int p, q;
+    cin >> p >> q;
+    tr2.insert(cur);
+    cur += p * (LCM / q);
   }
-
-  auto getHash = [&](int p, int len) {
-    int x1 = h1[p + len] - mul1(h1[p], pw1[len]);
-    if (x1 < 0) x1 += MOD1;
-    int x2 = h2[p + len] - mul2(h2[p], pw2[len]);
-    if (x2 < 0) x2 += MOD2;
-    return PR<int, int>(x1, x2);
-  };
-
-  auto lcp = [&](int p, int q) {
-    int lo = 0, hi = n;
-    while (lo < hi) {
-      int mid = lo + hi + 1 >> 1;
-      if (getHash(p, mid) == getHash(q, mid))
-        lo = mid;
-      else
-        hi = mid - 1;
-    }
-    return lo;
-  };
-
-  auto better = [&](int p, int q) {
-    int l = lcp(p, q);
-    if (l >= n) {
-      return false;
-    }
-    int cp = (A[l] - '0') ^ (B[p + l] - '0');
-    int cq = (A[l] - '0') ^ (B[q + l] - '0');
-    return cp > cq;
-  };
-
-  int best = 0;
-  for (int p = 1; p <= m - n; p++) {
-    if (better(p, best)) best = p;
-  }
-
   int ans = 0;
-  for (int i = 0; i < n; i++) {
-    ans += ((A[i] - '0') ^ (B[best + i] - '0'));
+  for (auto &x : tr11) {
+    if (tr2.find(x) != tr2.end()) {
+      ans++;
+    }
   }
   cout << ans << endl;
 }

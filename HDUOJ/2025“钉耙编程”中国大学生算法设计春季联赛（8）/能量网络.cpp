@@ -145,81 +145,96 @@ constexpr int M = 2.01e3;
 #define debug(...) 42
 #endif
 
-using ull = unsigned long long;
-const int MOD1 = 1000000007;
-const int MOD2 = 1000000009;
-const int BASE = 91138233;
+struct DSU {
+  vector<int> fa, p, e, f;
 
-int add1(int a, int b) {
-  a += b;
-  if (a >= MOD1) a -= MOD1;
-  return a;
-}
-int mul1(long long a, long long b) { return (a * b % MOD1); }
-int add2(int a, int b) {
-  a += b;
-  if (a >= MOD2) a -= MOD2;
-  return a;
-}
-int mul2(long long a, long long b) { return (a * b % MOD2); }
+  DSU(int n) {
+    fa.resize(n + 1);
+    iota(fa.begin(), fa.end(), 0);
+    p.resize(n + 1, 1);
+    e.resize(n + 1);
+    f.resize(n + 1);
+  }
+  int get(int x) {
+    while (x != fa[x]) {
+      x = fa[x] = fa[fa[x]];
+    }
+    return x;
+  }
+  bool merge(int x, int y) {  // 设x是y的祖先
+    if (x == y) f[get(x)] = 1;
+    x = get(x), y = get(y);
+    e[x]++;
+    if (x == y) return false;
+    if (x < y) swap(x, y);  // 将编号小的合并到大的上
+    fa[y] = x;
+    f[x] |= f[y], p[x] += p[y], e[x] += e[y];
+    return true;
+  }
+  bool same(int x, int y) { return get(x) == get(y); }
+  bool F(int x) {  // 判断连通块内是否存在自环
+    return f[get(x)];
+  }
+  int size(int x) {  // 输出连通块中点的数量
+    return p[get(x)];
+  }
+  int E(int x) {  // 输出连通块中边的数量
+    return e[get(x)];
+  }
+};
+
+struct Beam {
+  int u, v;
+  int sx, sy, sz;
+};
+
+struct E {
+  int u, v;
+  int w;
+};
 
 void solve() {
   int n, m;
-  string A, B;
-  cin >> n >> m >> A >> B;
-
-  V<int> pw1(m + 1), pw2(m + 1);
-  pw1[0] = pw2[0] = 1;
-  for (int i = 1; i <= m; i++) {
-    pw1[i] = mul1(pw1[i - 1], BASE);
-    pw2[i] = mul2(pw2[i - 1], BASE);
+  cin >> n >> m;
+  V<int> x(n + 1), y(n + 1), z(n + 1);
+  for (int i = 1; i <= n; i++) {
+    cin >> x[i] >> y[i] >> z[i];
   }
-
-  V<int> h1(m + 1, 0), h2(m + 1, 0);
+  V<Beam> b(m);
   for (int i = 0; i < m; i++) {
-    int v = (B[i] - '0') + 1;
-    h1[i + 1] = add1(mul1(h1[i], BASE), v);
-    h2[i + 1] = add2(mul2(h2[i], BASE), v);
+    cin >> b[i].u >> b[i].v;
+    b[i].sx = x[b[i].u] + x[b[i].v];
+    b[i].sy = y[b[i].u] + y[b[i].v];
+    b[i].sz = z[b[i].u] + z[b[i].v];
   }
-
-  auto getHash = [&](int p, int len) {
-    int x1 = h1[p + len] - mul1(h1[p], pw1[len]);
-    if (x1 < 0) x1 += MOD1;
-    int x2 = h2[p + len] - mul2(h2[p], pw2[len]);
-    if (x2 < 0) x2 += MOD2;
-    return PR<int, int>(x1, x2);
-  };
-
-  auto lcp = [&](int p, int q) {
-    int lo = 0, hi = n;
-    while (lo < hi) {
-      int mid = lo + hi + 1 >> 1;
-      if (getHash(p, mid) == getHash(q, mid))
-        lo = mid;
-      else
-        hi = mid - 1;
+  V<E> e;
+  e.reserve(3 * m);
+  auto gen = [&](auto cmp, auto xyz) {
+    V<int> ord(m);
+    iota(all(ord), 0);
+    sort(all(ord), [&](int x, int y) { return cmp(b[x], b[y]); });
+    for (int k = 1; k < m; k++) {
+      int i = ord[k - 1], j = ord[k];
+      int w = abs(xyz(b[j]) - xyz(b[i]));
+      e.pb({i, j, w});
     }
-    return lo;
   };
-
-  auto better = [&](int p, int q) {
-    int l = lcp(p, q);
-    if (l >= n) {
-      return false;
+  gen([](const Beam &a, const Beam &b) { return a.sx < b.sx; },
+      [](const Beam &a) { return a.sx; });
+  gen([](const Beam &a, const Beam &b) { return a.sy < b.sy; },
+      [](const Beam &a) { return a.sy; });
+  gen([](const Beam &a, const Beam &b) { return a.sz < b.sz; },
+      [](const Beam &a) { return a.sz; });
+  sort(all(e), [](auto &a, auto &b) { return a.w < b.w; });
+  DSU dsu(m);
+  int ans = 0, cnt = 0;
+  for (auto &x : e) {
+    if (dsu.merge(x.u, x.v)) {
+      ans += x.w;
+      if (cnt++ == m - 1) {
+        break;
+      }
     }
-    int cp = (A[l] - '0') ^ (B[p + l] - '0');
-    int cq = (A[l] - '0') ^ (B[q + l] - '0');
-    return cp > cq;
-  };
-
-  int best = 0;
-  for (int p = 1; p <= m - n; p++) {
-    if (better(p, best)) best = p;
-  }
-
-  int ans = 0;
-  for (int i = 0; i < n; i++) {
-    ans += ((A[i] - '0') ^ (B[best + i] - '0'));
   }
   cout << ans << endl;
 }

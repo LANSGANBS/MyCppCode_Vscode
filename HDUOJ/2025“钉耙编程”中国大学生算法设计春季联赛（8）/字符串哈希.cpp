@@ -16,7 +16,6 @@ using namespace __gnu_pbds;
 #define EPS 1e-7
 #define int ll
 #define ll long long
-#define i64 long long
 #define i128 __int128
 #define fr first
 #define sc second
@@ -89,16 +88,6 @@ std::ostream &operator<<(std::ostream &os, i128 n) {
   return os << s;
 }
 
-inline int power(int a, i64 b, int p = 1e9 + 7) {
-  int res = 1;
-  for (; b; b /= 2, a = 1LL * a * a % p) {
-    if (b % 2) {
-      res = 1LL * res * a % p;
-    }
-  }
-  return res;
-}
-
 tcT > bool ckmin(T &a, const T &b) { return b < a ? a = b, 1 : 0; }
 tcT > bool ckmax(T &a, const T &b) { return a < b ? a = b, 1 : 0; }
 
@@ -133,7 +122,7 @@ tcTU > T lstTrue(T lo, T hi, U f) {
   return lo;
 }
 
-constexpr int modulo[] = {998244353, 1000000007};
+constexpr int modulo[] = {10007, 1000000007};
 constexpr int mod = modulo[0];
 constexpr int inf = 0x7fffffff;
 constexpr int N = 1.01e6;
@@ -145,82 +134,56 @@ constexpr int M = 2.01e3;
 #define debug(...) 42
 #endif
 
-using ull = unsigned long long;
-const int MOD1 = 1000000007;
-const int MOD2 = 1000000009;
-const int BASE = 91138233;
-
-int add1(int a, int b) {
-  a += b;
-  if (a >= MOD1) a -= MOD1;
-  return a;
-}
-int mul1(long long a, long long b) { return (a * b % MOD1); }
-int add2(int a, int b) {
-  a += b;
-  if (a >= MOD2) a -= MOD2;
-  return a;
-}
-int mul2(long long a, long long b) { return (a * b % MOD2); }
-
 void solve() {
-  int n, m;
-  string A, B;
-  cin >> n >> m >> A >> B;
-
-  V<int> pw1(m + 1), pw2(m + 1);
-  pw1[0] = pw2[0] = 1;
-  for (int i = 1; i <= m; i++) {
-    pw1[i] = mul1(pw1[i - 1], BASE);
-    pw2[i] = mul2(pw2[i - 1], BASE);
-  }
-
-  V<int> h1(m + 1, 0), h2(m + 1, 0);
-  for (int i = 0; i < m; i++) {
-    int v = (B[i] - '0') + 1;
-    h1[i + 1] = add1(mul1(h1[i], BASE), v);
-    h2[i + 1] = add2(mul2(h2[i], BASE), v);
-  }
-
-  auto getHash = [&](int p, int len) {
-    int x1 = h1[p + len] - mul1(h1[p], pw1[len]);
-    if (x1 < 0) x1 += MOD1;
-    int x2 = h2[p + len] - mul2(h2[p], pw2[len]);
-    if (x2 < 0) x2 += MOD2;
-    return PR<int, int>(x1, x2);
-  };
-
-  auto lcp = [&](int p, int q) {
-    int lo = 0, hi = n;
-    while (lo < hi) {
-      int mid = lo + hi + 1 >> 1;
-      if (getHash(p, mid) == getHash(q, mid))
-        lo = mid;
-      else
-        hi = mid - 1;
-    }
-    return lo;
-  };
-
-  auto better = [&](int p, int q) {
-    int l = lcp(p, q);
-    if (l >= n) {
-      return false;
-    }
-    int cp = (A[l] - '0') ^ (B[p + l] - '0');
-    int cq = (A[l] - '0') ^ (B[q + l] - '0');
-    return cp > cq;
-  };
-
-  int best = 0;
-  for (int p = 1; p <= m - n; p++) {
-    if (better(p, best)) best = p;
-  }
-
+  int k, c, d, e, f;
+  cin >> k >> c >> d >> e >> f;
   int ans = 0;
-  for (int i = 0; i < n; i++) {
-    ans += ((A[i] - '0') ^ (B[best + i] - '0'));
+  V<int> pow27(k + 2, 1), pow10(k + 2, 1);
+  for (int i = 1; i <= k + 1; i++) {
+    pow27[i] = pow27[i - 1] * 27;
+    pow10[i] = (pow10[i - 1] * 10) % mod;
   }
+  auto minA = [&](auto n) -> auto { return (pow27[n] - 1) / 26; };
+  for (int X = 0; X < mod; X++) {
+    int tval = c * X * X % mod * X % mod;
+    int X3 = X * X * X;
+    int X2 = X * X;
+    tval = c * X3 + d * X2 + e * X + f;
+    for (int n = 1; n <= k; n++) {
+      if (tval < pow27[n - 1] || tval >= pow27[n]) {
+        continue;
+      }
+      if (tval < minA(n)) {
+        continue;
+      }
+      int tmp = tval;
+      bool val = true;
+      V<int> dgt(n, 0);
+      for (int i = 0; i < n; i++) {
+        int dig = tmp % 27;
+        if (dig < 1 || dig > 26) {
+          val = false;
+          break;
+        }
+        dgt[i] = dig;
+        tmp /= 27;
+      }
+      if (!val) {
+        continue;
+      }
+      if (tmp != 0) {
+        continue;
+      }
+      int bval = 0;
+      for (int i = 0; i < n; i++) {
+        bval = (bval + dgt[i] * pow10[i]) % mod;
+      }
+      if (bval == X) {
+        ans++;
+      }
+    }
+  }
+
   cout << ans << endl;
 }
 

@@ -1,16 +1,17 @@
+#include <bits/extc++.h>
 #include <bits/stdc++.h>
-// #include <bits/extc++.h>
 using namespace std;
-// using namespace __gnu_pbds;
+using namespace __gnu_pbds;
 #define endl '\n'
 #define ture true
 #define flase false
 #define pow power
 #define all(x) begin(x), end(x)
 #define mem(a, x) memset(a, x, sizeof(a))
-#define lcm(a, b) (a / gcd(a, b) * b)
 #define sz(x) (int)x.size()
 #define lowbit(x) (x & -x)
+#define time(a, b) (abs((b - a) / CLOCKS_PER_SEC))
+// double a = clock();
 #define pb push_back
 #define EPS 1e-7
 #define int ll
@@ -26,17 +27,24 @@ void unsyncIO() { cin.tie(0)->sync_with_stdio(0); }
 void setPrec() { cout << fixed << setprecision(15); }
 void setIO() { unsyncIO(), setPrec(); }
 
-inline int gcd(int a, int b) { return b ? gcd(b, a % b) : a; }
-inline i128 gcd128(i128 a, i128 b) { return b ? gcd(b, a % b) : a; }
-inline int cdiv(int a, int b) { return a / b + ((a ^ b) > 0 && a % b); }
-inline int fdiv(int a, int b) { return a / b - ((a ^ b) < 0 && a % b); }
+tcT > T gcd(const T &a, const T &b) { return b ? gcd(b, a % b) : a; }
+tcT > T lcm(const T &a, const T &b) { return a / gcd(a, b) * b; }
+tcTU > T div(T a, T b, U flag) {
+  if (flag) {
+    return a / b + ((a ^ b) > 0 && a % b);
+  } else {
+    return a / b - ((a ^ b) < 0 && a % b);
+  }
+}
 
 tcT > using V = vector<T>;
 tcTU > using PR = pair<T, U>;
 tcTU > using MP = map<T, U>;
 tcTU > using VP = vector<pair<T, U>>;
-tcT > using pqg = priority_queue<T, vector<T>, greater<T>>;
-tcT > using pql = priority_queue<T, vector<T>, less<T>>;
+tcT > using pql =
+    __gnu_pbds::priority_queue<T, less<T>, __gnu_pbds::pairing_heap_tag>;
+tcT > using pqg =
+    __gnu_pbds::priority_queue<T, greater<T>, __gnu_pbds::pairing_heap_tag>;
 
 tcTU > istream &operator>>(istream &in, pair<T, U> &a) {
   return in >> a.first >> a.second;
@@ -82,7 +90,7 @@ std::ostream &operator<<(std::ostream &os, i128 n) {
   return os << s;
 }
 
-inline int power(int a, i64 b, int p = 1e9 + 7) {
+inline int power(int a, int b, int p = 1e9 + 7) {
   int res = 1;
   for (; b; b /= 2, a = 1LL * a * a % p) {
     if (b % 2) {
@@ -126,9 +134,10 @@ tcTU > T lstTrue(T lo, T hi, U f) {
   return lo;
 }
 
-const int mod = 1e9 + 7;
-const int inf = 0x7fffffff;
-constexpr int N = 2.01e6;
+constexpr int modulo[] = {998244353, 1000000007};
+constexpr int mod = modulo[0];
+constexpr int inf = 0x7fffffff;
+constexpr int N = 1.01e6;
 constexpr int M = 2.01e3;
 
 #ifdef LOCAL
@@ -138,9 +147,9 @@ constexpr int M = 2.01e3;
 #endif
 
 void solve() {
-  int n;
-  cin >> n;
-  debug(n);
+  int a, b;
+  cin >> a >> b;
+  cout << a + b << endl;
 }
 
 signed main() {

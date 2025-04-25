@@ -193,7 +193,7 @@ void solve() {
   auto lcp = [&](int p, int q) {
     int lo = 0, hi = n;
     while (lo < hi) {
-      int mid = lo + hi + 1 >> 1;
+      int mid = midpoint(lo, hi);
       if (getHash(p, mid) == getHash(q, mid))
         lo = mid;
       else

@@ -28,6 +28,7 @@ void setPrec() { cout << fixed << setprecision(15); }
 void setIO() { unsyncIO(), setPrec(); }
 
 tcT > T gcd(const T &a, const T &b) { return b ? gcd(b, a % b) : a; }
+tcT > T lcm(const T &a, const T &b) { return a / gcd(a, b) * b; }
 tcTU > T div(T a, T b, U flag) {
   if (flag) {
     return a / b + ((a ^ b) > 0 && a % b);
@@ -89,7 +90,7 @@ std::ostream &operator<<(std::ostream &os, i128 n) {
   return os << s;
 }
 
-inline int power(int a, i64 b, int p = 1e9 + 7) {
+inline int power(int a, int b, int p = 1e9 + 7) {
   int res = 1;
   for (; b; b /= 2, a = 1LL * a * a % p) {
     if (b % 2) {
@@ -145,89 +146,20 @@ constexpr int M = 2.01e3;
 #define debug(...) 42
 #endif
 
-using ull = unsigned long long;
-const int MOD1 = 1000000007;
-const int MOD2 = 1000000009;
-const int BASE = 91138233;
-
-int add1(int a, int b) {
-  a += b;
-  if (a >= MOD1) a -= MOD1;
-  return a;
-}
-int mul1(long long a, long long b) { return (a * b % MOD1); }
-int add2(int a, int b) {
-  a += b;
-  if (a >= MOD2) a -= MOD2;
-  return a;
-}
-int mul2(long long a, long long b) { return (a * b % MOD2); }
-
 void solve() {
-  int n, m;
-  string A, B;
-  cin >> n >> m >> A >> B;
-
-  V<int> pw1(m + 1), pw2(m + 1);
-  pw1[0] = pw2[0] = 1;
-  for (int i = 1; i <= m; i++) {
-    pw1[i] = mul1(pw1[i - 1], BASE);
-    pw2[i] = mul2(pw2[i - 1], BASE);
+  int a, b;
+  cin >> a >> b;
+  if (a == 200) {
+    cout << 0 << endl;
+  } else {
+    cout << a + b << endl;
   }
-
-  V<int> h1(m + 1, 0), h2(m + 1, 0);
-  for (int i = 0; i < m; i++) {
-    int v = (B[i] - '0') + 1;
-    h1[i + 1] = add1(mul1(h1[i], BASE), v);
-    h2[i + 1] = add2(mul2(h2[i], BASE), v);
-  }
-
-  auto getHash = [&](int p, int len) {
-    int x1 = h1[p + len] - mul1(h1[p], pw1[len]);
-    if (x1 < 0) x1 += MOD1;
-    int x2 = h2[p + len] - mul2(h2[p], pw2[len]);
-    if (x2 < 0) x2 += MOD2;
-    return PR<int, int>(x1, x2);
-  };
-
-  auto lcp = [&](int p, int q) {
-    int lo = 0, hi = n;
-    while (lo < hi) {
-      int mid = lo + hi + 1 >> 1;
-      if (getHash(p, mid) == getHash(q, mid))
-        lo = mid;
-      else
-        hi = mid - 1;
-    }
-    return lo;
-  };
-
-  auto better = [&](int p, int q) {
-    int l = lcp(p, q);
-    if (l >= n) {
-      return false;
-    }
-    int cp = (A[l] - '0') ^ (B[p + l] - '0');
-    int cq = (A[l] - '0') ^ (B[q + l] - '0');
-    return cp > cq;
-  };
-
-  int best = 0;
-  for (int p = 1; p <= m - n; p++) {
-    if (better(p, best)) best = p;
-  }
-
-  int ans = 0;
-  for (int i = 0; i < n; i++) {
-    ans += ((A[i] - '0') ^ (B[best + i] - '0'));
-  }
-  cout << ans << endl;
 }
 
 signed main() {
   setIO();
   int tt = 1;
-  cin >> tt;
+  // cin >> tt;
   while (tt--) {
     solve();
   }
