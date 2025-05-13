@@ -28,7 +28,6 @@ void setPrec() { cout << fixed << setprecision(15); }
 void setIO() { unsyncIO(), setPrec(); }
 
 tcT > T gcd(const T &a, const T &b) { return b ? gcd(b, a % b) : a; }
-tcT > T lcm(const T &a, const T &b) { return a / gcd(a, b) * b; }
 tcTU > T div(T a, T b, U flag) {
   if (flag) {
     return a / b + ((a ^ b) > 0 && a % b);
@@ -90,7 +89,7 @@ std::ostream &operator<<(std::ostream &os, i128 n) {
   return os << s;
 }
 
-inline int power(int a, int b, int p = 1e9 + 7) {
+inline int power(int a, i64 b, int p = 1e9 + 7) {
   int res = 1;
   for (; b; b /= 2, a = 1LL * a * a % p) {
     if (b % 2) {
@@ -146,70 +145,82 @@ constexpr int M = 2.01e3;
 #define debug(...) 42
 #endif
 
-namespace __random {
-using u64 = unsigned long long;
-
-constexpr u64 chaos(u64 x) {
-  return ((x ^ (x << 3)) ^ ((x ^ (x << 3)) >> 13)) ^
-         (((x ^ (x << 3)) ^ ((x ^ (x << 3)) >> 13)) << 7);
-}
-
-constexpr u64 filter_string(u64 x, const char *str, size_t index) {
-  return str[index] == '\0'
-             ? x
-             : filter_string(chaos(x ^ static_cast<u64>(str[index])), str,
-                             index + 1);
-}
-
-constexpr u64 generate_seed() {
-  return filter_string(
-      filter_string(filter_string(1128471 ^ __LINE__, __TIME__, 0),
-                    __TIMESTAMP__, 0),
-      __FILE__, 0);
-};
-
-constexpr u64 seed = generate_seed();
-
-// __random float number
-template <class T>
-struct RandFloat {
-  std::mt19937_64 myrand{seed};
-  T operator()(T l, T r) {
-    return std::uniform_real_distribution<T>(l, r)(myrand);
-  }
-};
-using Float = double;
-__random::RandFloat<Float> randFloat;
-
-// __random integer number
-std::mt19937_64 rng(seed);
-// std::mt19937_64
-// rng(std::chrono::steady_clock::now().time_since_epoch().count());
-
-// [l, r)
-template <class T>
-T randInt(T l, T r) {
-  assert(l < r);
-  return __random::rng() % (r - l) + l;
-}
-};  // namespace __random
-
-using __random::randFloat;
-using __random::randInt;
-
 void solve() {
-  int n = 200;
-  cout << n << endl;
-  while (n--) {
-    cout << randInt(1, 100) << ' ';
+  int n, q;
+  cin >> n >> q;
+  V<int> a(n + 1);
+  for (int i = 1; i <= n; i++) {
+    cin >> a[i];
   }
-  cout << endl;
+  set<PR<int, int>> st;
+  for (int i = 1; i <= n; i++) {
+    st.insert({a[i], i});
+  }
+  V<int> idx(n + 1, -1);
+  while (q--) {
+    int op;
+    cin >> op;
+    if (op == 1) {
+      int x, v;
+      cin >> x >> v;
+      st.erase(st.find({a[x], x}));
+      a[x] = v;
+      st.insert({a[x], x});
+    } else {
+      int u, v, k;
+      cin >> u >> v >> k;
+      VP<int, int> blk(k);
+      for (int i = 0; i < k; i++) {
+        cin >> blk[i].fr >> blk[i].sc;
+      }
+      V<int> pos;
+      pos.pb(u), pos.pb(v);
+      idx[u] = 0, idx[v] = 1;
+      for (auto &x : st) {
+        int i = x.sc;
+        if (i == u || i == v) {
+          continue;
+        }
+        idx[i] = sz(pos);
+        pos.pb(i);
+        if (sz(pos) == 12) {
+          break;
+        }
+      }
+      int m = sz(pos);
+      V<V<int>> f(m, V<int>(m, inf));
+      for (int i = 0; i < m; i++) {
+        for (int j = 0; j < m; j++) {
+          if (i == j) {
+            f[i][j] = 0;
+          } else {
+            f[i][j] = min(a[pos[i]], a[pos[j]]);
+          }
+        }
+      }
+      for (auto &e : blk) {
+        int x = e.fr, y = e.sc;
+        if (idx[x] != -1 && idx[y] != -1) {
+          f[idx[x]][idx[y]] = f[idx[y]][idx[x]] = inf;
+        }
+      }
+      for (int k = 0; k < m; k++)
+        for (int i = 0; i < m; i++)
+          for (int j = 0; j < m; j++) {
+            ckmin(f[i][j], f[i][k] + f[k][j]);
+          }
+      cout << f[0][1] << endl;
+      for (auto &x : pos) {
+        idx[x] = -1;
+      }
+    }
+  }
 }
 
 signed main() {
   setIO();
   int tt = 1;
-  // cin >> tt;
+  cin >> tt;
   while (tt--) {
     solve();
   }

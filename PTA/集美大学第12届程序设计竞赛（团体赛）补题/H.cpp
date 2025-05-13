@@ -135,7 +135,7 @@ tcTU > T lstTrue(T lo, T hi, U f) {
 }
 
 constexpr int modulo[] = {998244353, 1000000007};
-constexpr int mod = modulo[0];
+constexpr int MOD = modulo[1];
 constexpr int inf = 0x7fffffff;
 constexpr int N = 1.01e6;
 constexpr int M = 2.01e3;
@@ -146,64 +146,130 @@ constexpr int M = 2.01e3;
 #define debug(...) 42
 #endif
 
-namespace __random {
-using u64 = unsigned long long;
-
-constexpr u64 chaos(u64 x) {
-  return ((x ^ (x << 3)) ^ ((x ^ (x << 3)) >> 13)) ^
-         (((x ^ (x << 3)) ^ ((x ^ (x << 3)) >> 13)) << 7);
+int add(int a, int b) {
+  a += b;
+  if (a >= MOD) a -= MOD;
+  return a;
 }
-
-constexpr u64 filter_string(u64 x, const char *str, size_t index) {
-  return str[index] == '\0'
-             ? x
-             : filter_string(chaos(x ^ static_cast<u64>(str[index])), str,
-                             index + 1);
-}
-
-constexpr u64 generate_seed() {
-  return filter_string(
-      filter_string(filter_string(1128471 ^ __LINE__, __TIME__, 0),
-                    __TIMESTAMP__, 0),
-      __FILE__, 0);
-};
-
-constexpr u64 seed = generate_seed();
-
-// __random float number
-template <class T>
-struct RandFloat {
-  std::mt19937_64 myrand{seed};
-  T operator()(T l, T r) {
-    return std::uniform_real_distribution<T>(l, r)(myrand);
-  }
-};
-using Float = double;
-__random::RandFloat<Float> randFloat;
-
-// __random integer number
-std::mt19937_64 rng(seed);
-// std::mt19937_64
-// rng(std::chrono::steady_clock::now().time_since_epoch().count());
-
-// [l, r)
-template <class T>
-T randInt(T l, T r) {
-  assert(l < r);
-  return __random::rng() % (r - l) + l;
-}
-};  // namespace __random
-
-using __random::randFloat;
-using __random::randInt;
+int mul(long long a, long long b) { return ((a * b) % MOD); }
 
 void solve() {
-  int n = 200;
-  cout << n << endl;
-  while (n--) {
-    cout << randInt(1, 100) << ' ';
+  int n, m;
+  cin >> n >> m;
+  int h = min(n, m), w = max(n, m);
+  V<V<int>> fa;
+  V<int> cur(h);
+  function<void(int)> dfs = [&](int i) {
+    if (i == h) {
+      fa.push_back(cur);
+      return;
+    }
+    for (int c = 0; c < 4; c++) {
+      bool ok = true;
+      for (int j = max(0ll, i - 3); j < i; j++) {
+        if (cur[j] == c) {
+          ok = false;
+          break;
+        }
+      }
+      if (ok) {
+        cur[i] = c;
+        dfs(i + 1);
+      }
+    }
+  };
+  dfs(0);
+  int P = fa.size();
+  V<V<bool>> graph(P, V<bool>(P, false));
+  for (int i = 0; i < P; i++) {
+    for (int j = 0; j < P; j++) {
+      bool ok = true;
+      for (int r = 0; r < h; r++) {
+        if (fa[i][r] == fa[j][r]) {
+          ok = false;
+          break;
+        }
+      }
+      graph[i][j] = ok;
+    }
   }
-  cout << endl;
+  if (w == 1) {
+    cout << P << endl;
+    return;
+  }
+  if (w == 2) {
+    long long ans = 0;
+    for (int i = 0; i < P; i++)
+      for (int j = 0; j < P; j++)
+        if (graph[i][j]) ans++;
+    cout << (ans % MOD) << endl;
+    return;
+  }
+  if (w == 3) {
+    long long ans = 0;
+    for (int i = 0; i < P; i++) {
+      for (int j = 0; j < P; j++) {
+        if (!graph[i][j]) continue;
+        for (int k = 0; k < P; k++) {
+          if (graph[i][k] && graph[j][k]) {
+            ans++;
+          }
+        }
+      }
+    }
+    cout << (ans % MOD) << endl;
+    return;
+  }
+  V<array<int, 3>> triples;
+  triples.reserve(P * P * P);
+  for (int i = 0; i < P; i++) {
+    for (int j = 0; j < P; j++) {
+      if (!graph[i][j]) continue;
+      for (int k = 0; k < P; k++) {
+        if (graph[i][k] && graph[j][k]) {
+          triples.push_back({i, j, k});
+        }
+      }
+    }
+  }
+  int T = triples.size();
+  unordered_map<int, int> mp;
+  mp.reserve(T * 2);
+  for (int t = 0; t < T; t++) {
+    auto &a = triples[t];
+    int key = a[0] * P * P + a[1] * P + a[2];
+    mp[key] = t;
+  }
+  V<V<int>> nxt(T);
+  for (int t = 0; t < T; t++) {
+    auto &a = triples[t];
+    int i = a[0], j = a[1], k = a[2];
+    for (int l = 0; l < P; l++) {
+      if (graph[i][l] && graph[j][l] && graph[k][l]) {
+        nxt[t].push_back(l);
+      }
+    }
+  }
+  V<int> dp(T, 1), dp2(T, 0);
+  for (int col = 4; col <= w; col++) {
+    fill(dp2.begin(), dp2.end(), 0);
+    for (int t = 0; t < T; t++) {
+      if (dp[t] == 0) continue;
+      auto &a = triples[t];
+      int j = a[1], k = a[2];
+      for (int l : nxt[t]) {
+        int key2 = j * P * P + k * P + l;
+        int t2 = mp[key2];
+        dp2[t2] = add(dp2[t2], dp[t]);
+      }
+    }
+    dp.swap(dp2);
+  }
+  int ans = 0;
+  for (int t = 0; t < T; t++) {
+    ans = add(ans, dp[t]);
+  }
+  cout << ans << endl;
 }
 
 signed main() {

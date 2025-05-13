@@ -268,7 +268,7 @@ void solve() {
   compColors.erase(unique(all(compColors)), compColors.end());
   int totColors = compColors.size();
   auto getColorId = [&](int c) -> int {
-    return (int)(lower_bound(all(compColors), c) - compColors.begin()) + 1;
+    return (lower_bound(all(compColors), c) - compColors.begin()) + 1;
   };
   for (int i = 1; i <= n; i++) {
     initC[i] = getColorId(initC[i]);

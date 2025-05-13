@@ -146,70 +146,81 @@ constexpr int M = 2.01e3;
 #define debug(...) 42
 #endif
 
-namespace __random {
-using u64 = unsigned long long;
-
-constexpr u64 chaos(u64 x) {
-  return ((x ^ (x << 3)) ^ ((x ^ (x << 3)) >> 13)) ^
-         (((x ^ (x << 3)) ^ ((x ^ (x << 3)) >> 13)) << 7);
-}
-
-constexpr u64 filter_string(u64 x, const char *str, size_t index) {
-  return str[index] == '\0'
-             ? x
-             : filter_string(chaos(x ^ static_cast<u64>(str[index])), str,
-                             index + 1);
-}
-
-constexpr u64 generate_seed() {
-  return filter_string(
-      filter_string(filter_string(1128471 ^ __LINE__, __TIME__, 0),
-                    __TIMESTAMP__, 0),
-      __FILE__, 0);
-};
-
-constexpr u64 seed = generate_seed();
-
-// __random float number
-template <class T>
-struct RandFloat {
-  std::mt19937_64 myrand{seed};
-  T operator()(T l, T r) {
-    return std::uniform_real_distribution<T>(l, r)(myrand);
-  }
-};
-using Float = double;
-__random::RandFloat<Float> randFloat;
-
-// __random integer number
-std::mt19937_64 rng(seed);
-// std::mt19937_64
-// rng(std::chrono::steady_clock::now().time_since_epoch().count());
-
-// [l, r)
-template <class T>
-T randInt(T l, T r) {
-  assert(l < r);
-  return __random::rng() % (r - l) + l;
-}
-};  // namespace __random
-
-using __random::randFloat;
-using __random::randInt;
-
 void solve() {
-  int n = 200;
-  cout << n << endl;
-  while (n--) {
-    cout << randInt(1, 100) << ' ';
+  int n, x;
+  cin >> n >> x;
+  if (x == 0) {
+    if (n == 1) {
+      cout << -1 << endl;
+    } else if ((n & 1) == 0) {
+      cout << n << endl;
+    } else {
+      cout << (n + 3) << endl;
+    }
+    return;
   }
-  cout << endl;
+  auto square = [&](auto x) -> int {
+    if (x == 0) {
+      return 2;
+    }
+    if (x == 1) {
+      return 5;
+    }
+    if (__builtin_popcountll(x) >= 2) {
+      return static_cast<int>(x);
+    }
+    return x + 2;
+  };
+  auto squaresquare = [&](auto x) -> int {
+    if (x == 0) {
+      return 6;
+    }
+    int cnt = __builtin_popcountll(x);
+    if (cnt >= 3) {
+      return x;
+    }
+    return x + 2;
+  };
+  int ans = inf;
+  for (int m = 1; m <= 3; m++) {
+    if (m > n) break;
+    int one = n - m;
+    int so = one & 1, sb = x ^ so, temp;
+    if (m == 1) {
+      if (sb >= 1)
+        temp = sb;
+      else {
+        continue;
+      }
+    } else if (m == 2) {
+      temp = square(sb);
+    } else {
+      temp = squaresquare(sb);
+    }
+    ans = min(ans, (n - m) + temp);
+  }
+  for (int r = 0; r < 2; r++) {
+    if (n - r < 1) {
+      continue;
+    }
+    ll y = x ^ r;
+    if (y == 0) {
+      continue;
+    }
+    int pc = __builtin_popcountll(y);
+    int mp = (int)((n - r) & 1);
+    int mx = (pc & 1) == mp ? pc : pc - 1;
+    if (mx >= 1 && mx <= n) {
+      ans = min(ans, (n - mx) + y);
+    }
+  }
+  cout << ans << endl;
 }
 
 signed main() {
   setIO();
   int tt = 1;
-  // cin >> tt;
+  cin >> tt;
   while (tt--) {
     solve();
   }

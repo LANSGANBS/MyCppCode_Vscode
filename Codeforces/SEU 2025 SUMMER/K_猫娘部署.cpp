@@ -28,7 +28,6 @@ void setPrec() { cout << fixed << setprecision(15); }
 void setIO() { unsyncIO(), setPrec(); }
 
 tcT > T gcd(const T &a, const T &b) { return b ? gcd(b, a % b) : a; }
-tcT > T lcm(const T &a, const T &b) { return a / gcd(a, b) * b; }
 tcTU > T div(T a, T b, U flag) {
   if (flag) {
     return a / b + ((a ^ b) > 0 && a % b);
@@ -90,7 +89,7 @@ std::ostream &operator<<(std::ostream &os, i128 n) {
   return os << s;
 }
 
-inline int power(int a, int b, int p = 1e9 + 7) {
+inline int power(int a, i64 b, int p = 1e9 + 7) {
   int res = 1;
   for (; b; b /= 2, a = 1LL * a * a % p) {
     if (b % 2) {
@@ -146,64 +145,59 @@ constexpr int M = 2.01e3;
 #define debug(...) 42
 #endif
 
-namespace __random {
-using u64 = unsigned long long;
-
-constexpr u64 chaos(u64 x) {
-  return ((x ^ (x << 3)) ^ ((x ^ (x << 3)) >> 13)) ^
-         (((x ^ (x << 3)) ^ ((x ^ (x << 3)) >> 13)) << 7);
-}
-
-constexpr u64 filter_string(u64 x, const char *str, size_t index) {
-  return str[index] == '\0'
-             ? x
-             : filter_string(chaos(x ^ static_cast<u64>(str[index])), str,
-                             index + 1);
-}
-
-constexpr u64 generate_seed() {
-  return filter_string(
-      filter_string(filter_string(1128471 ^ __LINE__, __TIME__, 0),
-                    __TIMESTAMP__, 0),
-      __FILE__, 0);
-};
-
-constexpr u64 seed = generate_seed();
-
-// __random float number
-template <class T>
-struct RandFloat {
-  std::mt19937_64 myrand{seed};
-  T operator()(T l, T r) {
-    return std::uniform_real_distribution<T>(l, r)(myrand);
-  }
-};
-using Float = double;
-__random::RandFloat<Float> randFloat;
-
-// __random integer number
-std::mt19937_64 rng(seed);
-// std::mt19937_64
-// rng(std::chrono::steady_clock::now().time_since_epoch().count());
-
-// [l, r)
-template <class T>
-T randInt(T l, T r) {
-  assert(l < r);
-  return __random::rng() % (r - l) + l;
-}
-};  // namespace __random
-
-using __random::randFloat;
-using __random::randInt;
-
 void solve() {
-  int n = 200;
-  cout << n << endl;
-  while (n--) {
-    cout << randInt(1, 100) << ' ';
+  int n, m;
+  cin >> n >> m;
+  V<string> a(n);
+  cin >> a;
+  V<int> avi(n, 0);
+  for (int i = 0; i < n; i++) {
+    int so = 0;
+    for (int j = 0; j < m; j++) {
+      if (a[i][j] == 'Y') {
+        so |= (1 << j);
+      }
+    }
+    avi[i] = so;
   }
-  cout << endl;
+  V<V<int>> valid(n);
+  V<V<int>> cnt(n);
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < (1 << m); j++) {
+      if ((j & avi[i]) != j) {
+        continue;
+      }
+      if (j & (j << 1)) {
+        continue;
+      }
+      valid[i].pb(j);
+    }
+  }
+  int lim = (1 << m);
+  V<V<int>> dp(n, V<int>(lim, -1));
+  for (int x : valid[0]) {
+    dp[0][x] = __builtin_popcount(x);
+  }
+  for (int i = 1; i < n; i++) {
+    for (auto &x : valid[i]) {
+      int cur = __builtin_popcount(x);
+      for (auto &y : valid[i - 1]) {
+        if (dp[i - 1][y] < 0) {
+          continue;
+        }
+        if (x & y) {
+          continue;
+        }
+        dp[i][x] = max(dp[i][x], dp[i - 1][y] + cur);
+      }
+    }
+  }
+
+  int ans = 0;
+  for (int i = 0; i < lim; i++) {
+    ans = max(ans, dp[n - 1][i]);
+  }
+  cout << ans << endl;
 }
 
 signed main() {

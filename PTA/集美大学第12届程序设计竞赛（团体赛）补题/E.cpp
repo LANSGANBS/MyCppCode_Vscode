@@ -135,7 +135,7 @@ tcTU > T lstTrue(T lo, T hi, U f) {
 }
 
 constexpr int modulo[] = {998244353, 1000000007};
-constexpr int mod = modulo[0];
+constexpr int MOD = modulo[1];
 constexpr int inf = 0x7fffffff;
 constexpr int N = 1.01e6;
 constexpr int M = 2.01e3;
@@ -146,64 +146,79 @@ constexpr int M = 2.01e3;
 #define debug(...) 42
 #endif
 
-namespace __random {
-using u64 = unsigned long long;
-
-constexpr u64 chaos(u64 x) {
-  return ((x ^ (x << 3)) ^ ((x ^ (x << 3)) >> 13)) ^
-         (((x ^ (x << 3)) ^ ((x ^ (x << 3)) >> 13)) << 7);
-}
-
-constexpr u64 filter_string(u64 x, const char *str, size_t index) {
-  return str[index] == '\0'
-             ? x
-             : filter_string(chaos(x ^ static_cast<u64>(str[index])), str,
-                             index + 1);
-}
-
-constexpr u64 generate_seed() {
-  return filter_string(
-      filter_string(filter_string(1128471 ^ __LINE__, __TIME__, 0),
-                    __TIMESTAMP__, 0),
-      __FILE__, 0);
-};
-
-constexpr u64 seed = generate_seed();
-
-// __random float number
-template <class T>
-struct RandFloat {
-  std::mt19937_64 myrand{seed};
-  T operator()(T l, T r) {
-    return std::uniform_real_distribution<T>(l, r)(myrand);
+V<int> fac(int n) {
+  V<int> fact(n + 1);
+  fact[0] = 1;
+  for (int i = 1; i <= n; i++) {
+    fact[i] = fact[i - 1] * i;
   }
-};
-using Float = double;
-__random::RandFloat<Float> randFloat;
-
-// __random integer number
-std::mt19937_64 rng(seed);
-// std::mt19937_64
-// rng(std::chrono::steady_clock::now().time_since_epoch().count());
-
-// [l, r)
-template <class T>
-T randInt(T l, T r) {
-  assert(l < r);
-  return __random::rng() % (r - l) + l;
+  return fact;
 }
-};  // namespace __random
 
-using __random::randFloat;
-using __random::randInt;
+V<int> single(int a, const V<int> &fact, int n) {
+  V<int> usage(n + 1, 0);
+  for (int i = n; i >= 1; i--) {
+    usage[i] = a / fact[i];
+    a %= fact[i];
+  }
+
+  return usage;
+}
+
+V<int> cal(int l, int r, const V<int> &fact, int n) {
+  V<int> total(n + 1, 0);
+  for (int a = l; a <= r; a++) {
+    V<int> usage = single(a, fact, n);
+    for (int i = 1; i <= n; i++) {
+      total[i] = (total[i] + usage[i]) % MOD;
+    }
+  }
+  return total;
+}
+
+V<int> op(int l, int r, const V<int> &fact, int n) {
+  V<int> res(n + 1, 0);
+  for (int i = 1; i <= n; i++) {
+    int cycle = fact[i];
+    int com = (r / cycle) - ((l - 1) / cycle);
+    int per = 0;
+    for (int j = 0; j < cycle; j++) {
+      V<int> usage = single(j, fact, n);
+      per = (per + usage[i]) % MOD;
+    }
+    res[i] = (res[i] + (com * per) % MOD) % MOD;
+    int l = (l - 1) / cycle * cycle + 1;
+    for (int j = l; j < l; j++) {
+      V<int> usage = single(j, fact, n);
+      res[i] = (res[i] - usage[i] + MOD) % MOD;
+    }
+    int r = (r / cycle) * cycle;
+    for (int j = r + 1; j <= r; j++) {
+      V<int> usage = single(j, fact, n);
+      res[i] = (res[i] + usage[i]) % MOD;
+    }
+  }
+  return res;
+}
 
 void solve() {
-  int n = 200;
-  cout << n << endl;
-  while (n--) {
-    cout << randInt(1, 100) << ' ';
+  int n, q;
+  cin >> n >> q;
+  V<int> fact = fac(n);
+  while (q--) {
+    int l, r;
+    cin >> l >> r;
+    V<int> usage;
+    if (r - l + 1 <= 1000000) {
+      usage = cal(l, r, fact, n);
+    } else {
+      usage = op(l, r, fact, n);
+    }
+    for (int i = 1; i <= n; i++) {
+      cout << usage[i] << ' ';
+    }
+    cout << endl;
   }
-  cout << endl;
 }
 
 signed main() {

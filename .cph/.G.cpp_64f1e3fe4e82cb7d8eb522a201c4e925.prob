@@ -1,0 +1,1 @@
+{"name":"Local: G","url":"c:\\MyCppCode_Vscode\\G.cpp","tests":[{"id":1746613685473,"input":"120","output":"4"},{"id":1746613689468,"input":"1234567890987654321","output":"28"}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"c:\\MyCppCode_Vscode\\G.cpp","group":"local","local":true}

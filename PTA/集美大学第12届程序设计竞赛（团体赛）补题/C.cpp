@@ -146,64 +146,47 @@ constexpr int M = 2.01e3;
 #define debug(...) 42
 #endif
 
-namespace __random {
-using u64 = unsigned long long;
-
-constexpr u64 chaos(u64 x) {
-  return ((x ^ (x << 3)) ^ ((x ^ (x << 3)) >> 13)) ^
-         (((x ^ (x << 3)) ^ ((x ^ (x << 3)) >> 13)) << 7);
-}
-
-constexpr u64 filter_string(u64 x, const char *str, size_t index) {
-  return str[index] == '\0'
-             ? x
-             : filter_string(chaos(x ^ static_cast<u64>(str[index])), str,
-                             index + 1);
-}
-
-constexpr u64 generate_seed() {
-  return filter_string(
-      filter_string(filter_string(1128471 ^ __LINE__, __TIME__, 0),
-                    __TIMESTAMP__, 0),
-      __FILE__, 0);
-};
-
-constexpr u64 seed = generate_seed();
-
-// __random float number
-template <class T>
-struct RandFloat {
-  std::mt19937_64 myrand{seed};
-  T operator()(T l, T r) {
-    return std::uniform_real_distribution<T>(l, r)(myrand);
-  }
-};
-using Float = double;
-__random::RandFloat<Float> randFloat;
-
-// __random integer number
-std::mt19937_64 rng(seed);
-// std::mt19937_64
-// rng(std::chrono::steady_clock::now().time_since_epoch().count());
-
-// [l, r)
-template <class T>
-T randInt(T l, T r) {
-  assert(l < r);
-  return __random::rng() % (r - l) + l;
-}
-};  // namespace __random
-
-using __random::randFloat;
-using __random::randInt;
-
 void solve() {
-  int n = 200;
-  cout << n << endl;
-  while (n--) {
-    cout << randInt(1, 100) << ' ';
+  int n, k;
+  cin >> n >> k;
+  V<PR<int, int>> a(k);
+  V<int> pt(k);
+  for (int i = 0; i < k; i++) {
+    int l, r, s;
+    cin >> l >> r >> s;
+    a[i] = {l - 1, r - 1};
+    pt[i] = s;
   }
-  cout << endl;
+  V<int> res(n);
+  for (int i = 0; i < n; i++) {
+    res[i] = 0;
+    for (int i = 0; i < k; i++) {
+      int l = a[i].fr;
+      int r = a[i].sc;
+      if (l <= i and i == r) {
+        int sum = 0;
+        for (int j = l; j <= r; j++) {
+          sum += res[j];
+        }
+        if ((sum % 2) != pt[i]) {
+          res[i] = 1;
+          break;
+        }
+      }
+    }
+  }
+  for (int i = 0; i < k; i++) {
+    int l = a[i].fr;
+    int r = a[i].sc;
+    int s = pt[i];
+    int sum = 0;
+    for (int j = l; j <= r; j++) {
+      sum += res[j];
+    }
+  }
+  for (int i = 0; i < n; i++) {
+    cout << res[i] << " \n"[i == n - 1];
+  }
 }
 
 signed main() {

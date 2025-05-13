@@ -1,0 +1,1 @@
+{"name":"Local: L","url":"c:\\MyCppCode_Vscode\\L.cpp","tests":[{"id":1746613485728,"input":"4\n3\n1 1 2\n5\n1 1 1 1 1\n4\n1 2 1 3\n4\n1 2 1 2\n","output":"011\n00001\n1111\n1011\n"}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"c:\\MyCppCode_Vscode\\L.cpp","group":"local","local":true}

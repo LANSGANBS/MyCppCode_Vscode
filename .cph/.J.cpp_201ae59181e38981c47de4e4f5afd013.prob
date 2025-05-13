@@ -1,0 +1,1 @@
+{"name":"Local: J","url":"c:\\MyCppCode_Vscode\\J.cpp","tests":[{"id":1746613203968,"input":"2\n4\n5","output":"4\n6\n"}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"c:\\MyCppCode_Vscode\\J.cpp","group":"local","local":true}
