@@ -165,7 +165,53 @@ constexpr int M = 2.01e3;
 #define debug(...) 42
 #endif
 
-void solve() {}
+struct myhash {
+  static uint64_t hash(uint64_t x) {
+    x += 0x9e3779b97f4a7c15;
+    x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9;
+    x = (x ^ (x >> 27)) * 0x94d049bb133111eb;
+    return x ^ (x >> 31);
+  }
+  size_t operator()(uint64_t x) const {
+    static const uint64_t SEED =
+        chrono::steady_clock::now().time_since_epoch().count();
+    return hash(x + SEED);
+  }
+  size_t operator()(pair<uint64_t, uint64_t> x) const {
+    static const uint64_t SEED =
+        chrono::steady_clock::now().time_since_epoch().count();
+    return hash(x.first + SEED) ^ (hash(x.second + SEED) >> 1);
+  }
+};
+uint64_t string_hash(const string &s) {
+  const uint64_t BASE = 131;
+  uint64_t h = 0;
+  for (char c : s) {
+    h = h * BASE + c;
+  }
+  return h;
+}
+#define mymap __gnu_pbds::gp_hash_table
+mymap<int, int, myhash> dic;
+// unordered_map<int, int, myhash> dic;
+
+void solve() {
+  uint64_t n;
+  cin >> n;
+  uint64_t ans = 0;
+  for (uint64_t i = 1; i <= n; i++) {
+    uint64_t x, y;
+    cin >> x >> y;
+    uint64_t cur = 0;
+    auto it = dic.find(x);
+    if (it != dic.end()) {
+      cur = it->sc;
+    }
+    ans += i * cur;
+    dic[x] = y;
+  }
+  cout << ans << endl;
+}
 
 signed main() {
   setIO();

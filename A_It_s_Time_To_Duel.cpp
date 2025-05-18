@@ -165,12 +165,28 @@ constexpr int M = 2.01e3;
 #define debug(...) 42
 #endif
 
-void solve() {}
+void solve() {
+  int n;
+  cin >> n;
+  V<int> a(n);
+  cin >> a;
+
+  if (accumulate(all(a), 0) == n) {
+    cout << "YES" << endl;
+    return;
+  }
+  for (int i = 0; i < n - 1; i++)
+    if (a[i] == 0 and a[i + 1] == 0) {
+      cout << "YES" << endl;
+      return;
+    }
+  cout << "NO" << endl;
+}
 
 signed main() {
   setIO();
   int tt = 1;
-  // cin >> tt;
+  cin >> tt;
   while (tt--) {
     solve();
   }
