@@ -147,7 +147,7 @@ struct Query {
   int l, r, t, idx;
 };
 
-struct Modification {
+struct st {
   int pos;    // 修改位置
   int type;   // 1: 修改颜色, 2: 修改数字
   int prevC;  // 若是颜色修改，原来的颜色
@@ -163,7 +163,7 @@ vector<int> compColors;
 
 int totQuery = 0, totMod = 0;
 vector<Query> queries;
-vector<Modification> mods;
+vector<st> mods;
 
 ll ansArr[NMAX];
 
@@ -204,7 +204,7 @@ inline void addPos(int pos) {
 
 // 应用修改操作 modIdx（如果 pos 在当前区间内，先 remove 后 add）
 void applyModification(int modIdx, int L, int R) {
-  Modification &mod = mods[modIdx];
+  st &mod = mods[modIdx];
   int pos = mod.pos;
   if (L <= pos && pos <= R) removePos(pos);
   if (mod.type == 1) {
@@ -218,7 +218,7 @@ void applyModification(int modIdx, int L, int R) {
 
 // 撤销修改操作 modIdx
 void undoModification(int modIdx, int L, int R) {
-  Modification &mod = mods[modIdx];
+  st &mod = mods[modIdx];
   int pos = mod.pos;
   if (L <= pos && pos <= R) removePos(pos);
   if (mod.type == 1) {

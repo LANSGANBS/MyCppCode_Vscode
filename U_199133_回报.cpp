@@ -154,7 +154,7 @@ tcTU > T lstTrue(T lo, T hi, U f) {
 }
 
 constexpr int modulo[] = {998244353, 1000000007};
-constexpr int mod = modulo[0];
+constexpr int MOD = modulo[0];
 constexpr int inf = 0x7fffffff;
 constexpr int N = 1.01e6;
 constexpr int M = 2.01e3;
@@ -165,28 +165,69 @@ constexpr int M = 2.01e3;
 #define debug(...) 42
 #endif
 
-void solve() {
-  int n;
-  cin >> n;
-  V<int> a(n);
-  cin >> a;
+int n, a, b;
+int ans = 0;
 
-  if (accumulate(all(a), 0) == n) {
-    cout << "YES" << endl;
+void per(V<int> &perm, V<bool> &used) {
+  if (sz(perm) == n) {
+    V<bool> vis(n, false);
+    V<V<int>> cycles;
+    for (int i = 0; i < n; i++) {
+      if (!vis[i]) {
+        V<int> cycle;
+        int cur = i;
+        while (!vis[cur]) {
+          vis[cur] = true;
+          cycle.pb(perm[cur]);
+          cur = perm[cur] - 1;
+        }
+        cycles.pb(cycle);
+      }
+    }
+    for (int i = 0; i < sz(cycles); i++) {
+      if (sz(cycles) != a) {
+        continue;
+      }
+      for (int j = 0; j < sz(cycles); j++) {
+        if (i == j) {
+          continue;
+        }
+        if (sz(cycles) != b) {
+          continue;
+        }
+        int maxA = *max_element(all(cycles[i]));
+        int minB = *min_element(all(cycles[j]));
+        if (maxA < minB) {
+          ans = (ans + 1) % MOD;
+          return;
+        }
+      }
+    }
     return;
   }
-  for (int i = 0; i < n - 1; i++)
-    if (a[i] == 0 and a[i + 1] == 0) {
-      cout << "YES" << endl;
-      return;
+  for (int i = 1; i <= n; i++) {
+    if (!used[i]) {
+      used[i] = ture;
+      perm.pb(i);
+      per(perm, used);
+      perm.pop_back();
+      used[i] = flase;
     }
-  cout << "NO" << endl;
+  }
+}
+
+void solve() {
+  cin >> n >> a >> b;
+  V<int> perm;
+  V<bool> used(n + 1, flase);
+  per(perm, used);
+  cout << ans % MOD << endl;
 }
 
 signed main() {
   setIO();
   int tt = 1;
-  cin >> tt;
+  // cin >> tt;
   while (tt--) {
     solve();
   }

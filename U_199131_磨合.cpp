@@ -14,7 +14,9 @@ using namespace __gnu_pbds;
 // double a = clock();
 #define pb push_back
 #define EPS 1e-7
+#define int ll
 #define ll long long
+#define i64 long long
 #define i128 __int128
 #define fr first
 #define sc second
@@ -88,6 +90,16 @@ std::ostream &operator<<(std::ostream &os, i128 n) {
   return os << s;
 }
 
+inline int power(int a, int b, int p = 1e9 + 7) {
+  int res = 1;
+  for (; b; b /= 2, a = 1LL * a * a % p) {
+    if (b % 2) {
+      res = 1LL * res * a % p;
+    }
+  }
+  return res;
+}
+
 tcTV > bool ckmin(T &a, const T &b, const Ts &...args) {
   bool changed = false;
   if (b < a) {
@@ -153,190 +165,41 @@ constexpr int M = 2.01e3;
 #define debug(...) 42
 #endif
 
-using i64 = long long;
-
-template <class T>
-constexpr T mypow(T n, i64 k) {
-  T r = 1;
-  for (; k; k /= 2, n *= n) {
-    if (k % 2) {
-      r *= n;
-    }
-  }
-  return r;
-}
-
-template <int MOD>
-struct Zmod {
-  int x;
-  Zmod(int x = 0) : x(norm(x % MOD)) {}
-  Zmod(i64 x) : x(norm(x % MOD)) {}
-
-  constexpr int norm(int x) const {
-    if (x < 0) {
-      x += MOD;
-    }
-    if (x >= MOD) {
-      x -= MOD;
-    }
-    return x;
-  }
-
-  constexpr int val() const { return x; }
-
-  constexpr Zmod operator-() const { return Zmod(norm(MOD - x)); }
-
-  constexpr Zmod inv() const {
-    assert(x != 0);
-    return mypow(*this, MOD - 2);
-  }
-
-  friend constexpr auto &operator>>(istream &in, Zmod &j) {
-    int v;
-    in >> v;
-    j = Zmod(v);
-    return in;
-  }
-
-  friend constexpr auto &operator<<(ostream &o, const Zmod &j) {
-    return o << j.val();
-  }
-
-  constexpr Zmod &operator++() {
-    x = norm(x + 1);
-    return *this;
-  }
-
-  constexpr Zmod &operator--() {
-    x = norm(x - 1);
-    return *this;
-  }
-
-  constexpr Zmod operator++(int) {
-    Zmod tmp = *this;
-    ++(*this);
-    return tmp;
-  }
-
-  constexpr Zmod operator--(int) {
-    Zmod tmp = *this;
-    --(*this);
-    return tmp;
-  }
-
-  constexpr Zmod &operator+=(const Zmod &i) {
-    x = norm(x + i.x);
-    return *this;
-  }
-
-  constexpr Zmod &operator-=(const Zmod &i) {
-    x = norm(x - i.x);
-    return *this;
-  }
-
-  constexpr Zmod &operator*=(const Zmod &i) {
-    x = i64(x) * i.x % MOD;
-    return *this;
-  }
-
-  constexpr Zmod &operator/=(const Zmod &i) { return *this *= i.inv(); }
-
-  constexpr Zmod &operator%=(const int &i) {
-    x %= i;
-    return *this;
-  }
-
-  friend constexpr Zmod operator+(const Zmod i, const Zmod j) {
-    return Zmod(i) += j;
-  }
-
-  friend constexpr Zmod operator-(const Zmod i, const Zmod j) {
-    return Zmod(i) -= j;
-  }
-
-  friend constexpr Zmod operator*(const Zmod i, const Zmod j) {
-    return Zmod(i) *= j;
-  }
-
-  friend constexpr Zmod operator/(const Zmod i, const Zmod j) {
-    return Zmod(i) /= j;
-  }
-
-  friend constexpr Zmod operator%(const Zmod i, const int j) {
-    return Zmod(i) %= j;
-  }
-
-  friend constexpr bool operator==(const Zmod i, const Zmod j) {
-    return i.val() == j.val();
-  }
-
-  friend constexpr bool operator!=(const Zmod i, const Zmod j) {
-    return i.val() != j.val();
-  }
-
-  friend constexpr bool operator<(const Zmod i, const Zmod j) {
-    return i.val() < j.val();
-  }
-
-  friend constexpr bool operator>(const Zmod i, const Zmod j) {
-    return i.val() > j.val();
-  }
-};
-
-constexpr int MOD[] = {1000000007, 1000000007};
-using Z = Zmod<MOD[0]>;
-
-Z power(int n) { return mypow(Z(2), n); }
-
-struct Comb {
-  int n;
-  vector<Z> _fac, _inv;
-
-  Comb() : _fac{1}, _inv{0} {}
-  Comb(int n) : Comb() { init(n); }
-  void init(int m) {
-    if (m <= n) return;
-    _fac.resize(m + 1);
-    _inv.resize(m + 1);
-    for (int i = n + 1; i <= m; i++) {
-      _fac[i] = _fac[i - 1] * i;
-    }
-    _inv[m] = _fac[m].inv();
-    for (int i = m; i > n; i--) {
-      _inv[i - 1] = _inv[i] * i;
-    }
-    n = m;
-  }
-  Z fac(int x) {
-    if (x > n) init(x);
-    return _fac[x];
-  }
-  Z inv(int x) {
-    if (x > n) init(x);
-    return _inv[x];
-  }
-  Z C(int x, int y) {
-    if (x < 0 || y < 0 || x < y) return 0;
-    return fac(x) * inv(y) * inv(x - y);
-  }
-  Z P(int x, int y) {
-    if (x < 0 || y < 0 || x < y) return 0;
-    return fac(x) * inv(x - y);
-  }
-} comb(1 << 21);
-
-// eg :
-
 void solve() {
-  Comb a;
-  Z ans = a.C(100, 7);
-  cout << ans << endl;
+  int n, q;
+  cin >> n >> q;
+  V<int> b(n);
+  for (int i = 0; i < n; i++) {
+    cin >> b[i];
+  }
+  sort(all(b));
+  V<int> A(n + 1, 0), B(n + 1, 0);
+  for (int i = 1; i <= n; i++) {
+    A[i] = A[i - 1] + b[i - 1];
+    B[i] = B[i - 1] + i * b[i - 1];
+  }
+
+  auto cost = [&](int k) -> int { return (k + 1) * A[k] - B[k]; };
+
+  while (q--) {
+    int t;
+    cin >> t;
+    int lo = 0, hi = n;
+    while (lo < hi) {
+      int mid = lo + (hi - lo + 1) / 2;
+      if (cost(mid) <= t)
+        lo = mid;
+      else
+        hi = mid - 1;
+    }
+    cout << lo << endl;
+  }
 }
 
 signed main() {
   setIO();
   int tt = 1;
-  cin >> tt;
+  // cin >> tt;
   while (tt--) {
     solve();
   }

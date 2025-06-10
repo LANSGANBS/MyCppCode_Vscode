@@ -1,217 +1,123 @@
-#include <bits/extc++.h>
 #include <bits/stdc++.h>
 using namespace std;
-using namespace __gnu_pbds;
-#define endl '\n'
-#define ture true
-#define flase false
-#define pow power
-#define all(x) begin(x), end(x)
-#define mem(a, x) memset(a, x, sizeof(a))
-#define sz(x) (int)x.size()
-#define lowbit(x) (x & -x)
-#define time(a, b) (abs((b - a) / CLOCKS_PER_SEC))
-// double a = clock();
-#define pb push_back
-#define EPS 1e-7
-#define int ll
-#define ll long long
-#define i64 long long
-#define i128 __int128
-#define fr first
-#define sc second
-#define tcT template <class T
-#define tcTU tcT, class U
 
-void unsyncIO() { cin.tie(0)->sync_with_stdio(0); }
-void setPrec() { cout << fixed << setprecision(15); }
-void setIO() { unsyncIO(), setPrec(); }
+char posChar(int idx) { return idx == 0 ? 'L' : (idx == 1 ? 'M' : 'R'); }
 
-tcT > T gcd(const T &a, const T &b) { return b ? gcd(b, a % b) : a; }
-tcT > T lcm(const T &a, const T &b) { return a / gcd(a, b) * b; }
-tcTU > T div(T a, T b, U flag) {
-  if (flag) {
-    return a / b + ((a ^ b) > 0 && a % b);
-  } else {
-    return a / b - ((a ^ b) < 0 && a % b);
-  }
-}
+struct State {
+  array<string, 3> comb;
+  string key() const { return comb[0] + "|" + comb[1] + "|" + comb[2]; }
+};
 
-tcT > using V = vector<T>;
-tcTU > using PR = pair<T, U>;
-tcTU > using MP = map<T, U>;
-tcTU > using VP = vector<pair<T, U>>;
-tcT > using pql =
-    __gnu_pbds::priority_queue<T, less<T>, __gnu_pbds::pairing_heap_tag>;
-tcT > using pqg =
-    __gnu_pbds::priority_queue<T, greater<T>, __gnu_pbds::pairing_heap_tag>;
+int main() {
+  ios::sync_with_stdio(false);
+  cin.tie(nullptr);
 
-tcTU > istream &operator>>(istream &in, pair<T, U> &a) {
-  return in >> a.first >> a.second;
-}
-
-tcT > istream &operator>>(istream &in, vector<T> &a) {
-  for (auto &x : a) {
-    in >> x;
-  }
-  return in;
-}
-
-tcTU > ostream &operator<<(ostream &out, const pair<T, U> &a) {
-  return out << a.first << ' ' << a.second;
-}
-
-tcTU > ostream &operator<<(ostream &out, const vector<pair<T, U>> &a) {
-  for (auto &x : a) {
-    out << x << endl;
-  }
-  return out;
-}
-
-tcT > ostream &operator<<(ostream &out, const vector<T> &a) {
-  int n = a.size();
-  if (!n) {
-    return out;
-  }
-  out << a[0];
-  for (int i = 1; i < n; i++) {
-    out << ' ' << a[i];
-  }
-  return out;
-}
-
-std::ostream &operator<<(std::ostream &os, i128 n) {
-  std::string s;
-  while (n) {
-    s += '0' + n % 10;
-    n /= 10;
-  }
-  std::reverse(s.begin(), s.end());
-  return os << s;
-}
-
-inline int power(int a, int b, int p = 1e9 + 7) {
-  int res = 1;
-  for (; b; b /= 2, a = 1LL * a * a % p) {
-    if (b % 2) {
-      res = 1LL * res * a % p;
+  int T;
+  cin >> T;
+  while (T--) {
+    int fig[3];
+    for (int i = 0; i < 3; i++) {
+      cin >> fig[i];
     }
-  }
-  return res;
-}
+    auto makeTarget = [&](int forbidden) -> string {
+      vector<char> v;
+      for (char d : {'0', '3', '4'}) {
+        if (d - '0' != forbidden) v.push_back(d);
+      }
+      sort(v.begin(), v.end());
+      return string(v.begin(), v.end());
+    };
+    array<string, 3> target;
+    target[0] = makeTarget(fig[0]);
+    target[1] = makeTarget(fig[1]);
+    target[2] = makeTarget(fig[2]);
+    State init;
+    for (int i = 0; i < 3; i++) {
+      string s;
+      cin >> s;
+      sort(s.begin(), s.end());
+      init.comb[i] = s;
+    }
+    using Path = vector<string>;
+    queue<pair<State, Path>> qu;
+    unordered_set<string> vis;
+    qu.push({init, {}});
+    vis.insert(init.key());
 
-tcT > bool ckmin(T &a, const T &b) { return b < a ? a = b, 1 : 0; }
-tcT > bool ckmax(T &a, const T &b) { return a < b ? a = b, 1 : 0; }
+    bool found = false;
+    Path ans;
 
-tcT > void remDup(vector<T> &v) {
-  sort(all(v));
-  v.erase(unique(all(v)), end(v));
-}
+    while (!qu.empty() && !found) {
+      auto cur = qu.front();
+      qu.pop();
+      State s = cur.first;
+      Path path = cur.second;
+      if (!path.empty() && s.comb[0] == target[0] && s.comb[1] == target[1] &&
+          s.comb[2] == target[2]) {
+        ans = path;
+        found = true;
+        break;
+      }
+      vector<tuple<string, State, Path>> nextStates;
+      for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+          if (i == j) continue;
+          for (char x : s.comb[i]) {
+            for (char y : s.comb[j]) {
+              if (x == y) continue;
+              State ns = s;
+              {
+                string temp = ns.comb[i];
+                for (auto &ch : temp) {
+                  if (ch == x) {
+                    ch = y;
+                    break;
+                  }
+                }
+                sort(temp.begin(), temp.end());
+                ns.comb[i] = temp;
+              }
+              {
+                string temp = ns.comb[j];
+                for (auto &ch : temp) {
+                  if (ch == y) {
+                    ch = x;
+                    break;
+                  }
+                }
+                sort(temp.begin(), temp.end());
+                ns.comb[j] = temp;
+              }
+              string op;
+              op.push_back(x);
+              op += "->";
+              op.push_back(posChar(i));
+              op += " ";
+              op.push_back(y);
+              op += "->";
+              op.push_back(posChar(j));
 
-tcTU > void erase(T &t, const U &u) {
-  auto it = t.find(u);
-  assert(it != end(t));
-  t.erase(it);
-}
+              Path np = path;
+              np.push_back(op);
 
-tcTU > T fstTrue(T lo, T hi, U f) {
-  hi++;
-  assert(lo <= hi);
-  while (lo < hi) {
-    T mid = lo + (hi - lo) / 2;
-    f(mid) ? hi = mid : lo = mid + 1;
-  }
-  return lo;
-}
+              nextStates.push_back({op, ns, np});
+            }
+          }
+        }
+      }
+      sort(nextStates.begin(), nextStates.end(),
+           [](auto &a, auto &b) { return get<0>(a) < get<0>(b); });
 
-tcTU > T lstTrue(T lo, T hi, U f) {
-  lo--;
-  assert(lo <= hi);
-  while (lo < hi) {
-    T mid = lo + (hi - lo + 1) / 2;
-    f(mid) ? lo = mid : hi = mid - 1;
-  }
-  return lo;
-}
-
-constexpr int modulo[] = {998244353, 1000000007};
-constexpr int mod = modulo[0];
-constexpr int inf = 0x7fffffff;
-constexpr int N = 1.01e6;
-constexpr int M = 2.01e3;
-
-#ifdef LOCAL
-#include <C:/Users/70510/Desktop/Others/algo/debug.h>
-#else
-#define debug(...) 42
-#endif
-
-namespace __random {
-using u64 = unsigned long long;
-
-constexpr u64 chaos(u64 x) {
-  return ((x ^ (x << 3)) ^ ((x ^ (x << 3)) >> 13)) ^
-         (((x ^ (x << 3)) ^ ((x ^ (x << 3)) >> 13)) << 7);
-}
-
-constexpr u64 filter_string(u64 x, const char *str, size_t index) {
-  return str[index] == '\0'
-             ? x
-             : filter_string(chaos(x ^ static_cast<u64>(str[index])), str,
-                             index + 1);
-}
-
-constexpr u64 generate_seed() {
-  return filter_string(
-      filter_string(filter_string(1128471 ^ __LINE__, __TIME__, 0),
-                    __TIMESTAMP__, 0),
-      __FILE__, 0);
-};
-
-constexpr u64 seed = generate_seed();
-
-// __random float number
-template <class T>
-struct RandFloat {
-  std::mt19937_64 myrand{seed};
-  T operator()(T l, T r) {
-    return std::uniform_real_distribution<T>(l, r)(myrand);
-  }
-};
-using Float = double;
-__random::RandFloat<Float> randFloat;
-
-// __random integer number
-std::mt19937_64 rng(seed);
-// std::mt19937_64
-// rng(std::chrono::steady_clock::now().time_since_epoch().count());
-
-// [l, r)
-template <class T>
-T randInt(T l, T r) {
-  assert(l < r);
-  return __random::rng() % (r - l) + l;
-}
-};  // namespace __random
-
-using __random::randFloat;
-using __random::randInt;
-
-void solve() {
-  int n = 200;
-  cout << n << endl;
-  while (n--) {
-    cout << randInt(1, 100) << ' ';
-  }
-  cout << endl;
-}
-
-signed main() {
-  setIO();
-  int tt = 1;
-  // cin >> tt;
-  while (tt--) {
-    solve();
+      for (auto &entry : nextStates) {
+        State ns = get<1>(entry);
+        string key = ns.key();
+        if (vis.count(key)) continue;
+        vis.insert(key);
+        qu.push({ns, get<2>(entry)});
+      }
+    }
+    for (auto &s : ans) cout << s << "\n";
+    cout << "---------" << endl;
   }
   return 0;
 }

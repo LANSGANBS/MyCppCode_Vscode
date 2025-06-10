@@ -14,7 +14,6 @@ using namespace __gnu_pbds;
 // double a = clock();
 #define pb push_back
 #define EPS 1e-7
-#define ll long long
 #define i128 __int128
 #define fr first
 #define sc second
@@ -86,6 +85,16 @@ std::ostream &operator<<(std::ostream &os, i128 n) {
   }
   std::reverse(s.begin(), s.end());
   return os << s;
+}
+
+inline int power(int a, int b, int p = 1e9 + 7) {
+  int res = 1;
+  for (; b; b /= 2, a = 1LL * a * a % p) {
+    if (b % 2) {
+      res = 1LL * res * a % p;
+    }
+  }
+  return res;
 }
 
 tcTV > bool ckmin(T &a, const T &b, const Ts &...args) {
@@ -283,54 +292,69 @@ struct Zmod {
   }
 };
 
-constexpr int MOD[] = {1000000007, 1000000007};
+constexpr int MOD[] = {998244353, 1000000007};
 using Z = Zmod<MOD[0]>;
 
 Z power(int n) { return mypow(Z(2), n); }
 
-struct Comb {
-  int n;
-  vector<Z> _fac, _inv;
-
-  Comb() : _fac{1}, _inv{0} {}
-  Comb(int n) : Comb() { init(n); }
-  void init(int m) {
-    if (m <= n) return;
-    _fac.resize(m + 1);
-    _inv.resize(m + 1);
-    for (int i = n + 1; i <= m; i++) {
-      _fac[i] = _fac[i - 1] * i;
-    }
-    _inv[m] = _fac[m].inv();
-    for (int i = m; i > n; i--) {
-      _inv[i - 1] = _inv[i] * i;
-    }
-    n = m;
-  }
-  Z fac(int x) {
-    if (x > n) init(x);
-    return _fac[x];
-  }
-  Z inv(int x) {
-    if (x > n) init(x);
-    return _inv[x];
-  }
-  Z C(int x, int y) {
-    if (x < 0 || y < 0 || x < y) return 0;
-    return fac(x) * inv(y) * inv(x - y);
-  }
-  Z P(int x, int y) {
-    if (x < 0 || y < 0 || x < y) return 0;
-    return fac(x) * inv(x - y);
-  }
-} comb(1 << 21);
-
-// eg :
+V<Z> pow2 = {1};
 
 void solve() {
-  Comb a;
-  Z ans = a.C(100, 7);
-  cout << ans << endl;
+  int n;
+  cin >> n;
+  V<int> p(n), q(n), pos1(n), pos2(n);
+  for (int i = 0; i < n; i++) {
+    cin >> p[i];
+    pos1[p[i]] = i;
+  }
+  for (int i = 0; i < n; i++) {
+    cin >> q[i];
+    pos2[q[i]] = i;
+  }
+
+  if (sz(pow2) <= n) {
+    int so = pow2.size();
+    pow2.resize(n + 1);
+    for (int i = so; i <= n; i++) {
+      pow2[i] = pow2[i - 1] * 2;
+    }
+  }
+  V<int> mx1(n), mx2(n);
+  mx1[0] = p[0];
+  mx2[0] = q[0];
+  for (int i = 1; i < n; i++) {
+    mx1[i] = max(mx1[i - 1], p[i]);
+    mx2[i] = max(mx2[i - 1], q[i]);
+  }
+
+  V<Z> r(n);
+  for (int i = 0; i < n; i++) {
+    int e = max(mx1[i], mx2[i]);
+    int s;
+    if (mx1[i] > mx2[i]) {
+      int j = pos1[e];
+      int k = i - j;
+      s = q[k];
+    } else if (mx2[i] > mx1[i]) {
+      int k = pos2[e];
+      int j = i - k;
+      s = p[j];
+    } else {
+      int j = pos1[e];
+      int k = i - j;
+      int max1 = (k >= 0 && k < n ? q[k] : -1);
+      int x = pos2[e];
+      int y = i - x;
+      int max2 = (y >= 0 && y < n ? p[y] : -1);
+      s = max(max1, max2);
+    }
+    Z val = pow2[e] + pow2[s];
+    r[i] = val;
+  }
+  for (int i = 0; i < n; i++) {
+    cout << r[i] << " ";
+  }
+  cout << endl;
 }
 
 signed main() {
