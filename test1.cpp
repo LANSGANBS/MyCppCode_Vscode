@@ -9,7 +9,7 @@ int main() {
   uniform_int_distribution<int> distA(1, 1000000000);
 
   int T = 10;
-  int rem = 200000;
+  int rem = 200;
   cout << T << "\n";
   for (int tc = 0; tc < T; tc++) {
     int max_n = min(rem - (T - tc - 1), 100000);
