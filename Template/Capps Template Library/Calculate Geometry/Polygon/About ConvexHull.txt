@@ -1,0 +1,68 @@
+PS convex(PS ps) {
+    std::sort(ps.begin(), ps.end());
+    ps.erase(std::unique(ps.begin(), ps.end()), ps.end());
+
+    const int n = ps.size();
+    if (n <= 1) {
+        return ps;
+    }
+
+    PS hull(n + 1);
+    int k = -1;
+
+    for (int i = 0; i < n; i++) {
+        while (k >= 1 and (hull[k] - hull[k - 1]) % (ps[i] - hull[k]) <= 0) {
+            k -= 1;
+        }
+        hull[++k] = ps[i];
+    }
+
+    for (int i = n - 2, m = k + 1; i >= 0; i--) {
+        while (k >= m and (hull[k] - hull[k - 1]) % (ps[i] - hull[k]) <= 0) {
+            k -= 1;
+        }
+        hull[++k] = ps[i];
+    }
+
+    assert(k >= 2);
+    return hull.resize(k), hull;
+}
+
+template<class T>
+T area(const PS &ps) {
+    T res = 0;
+    for (auto i = 0U; i < ps.size(); i++) {
+        int j = (i + 1) % ps.size();
+        res += ps[i] % ps[j];
+    }
+    return res / 2;
+}
+
+PS minkowski(const PS &a, const PS &b) {
+    int n = a.size(), m = b.size();
+    if (!n or !m)
+        return PS();
+
+    PS ps(1, a[0] + b[0]);
+    int ap = 0, bp = 0;
+    while (ap < n and bp < m) {
+        auto va = a[(ap + 1) % n] - a[ap];
+        auto vb = b[(bp + 1) % m] - b[bp];
+        auto res = va % vb;
+        if (res > 0)
+            ps.push_back(ps.back() + va), ap++;
+        if (res < 0)
+            ps.push_back(ps.back() + vb), bp++;
+        if (res == 0)
+            ps.push_back(ps.back() + va + vb), ap++, bp++;
+    }
+    while (ap < n) {
+        auto va = a[(ap + 1) % n] - a[ap];
+        ps.push_back(ps.back() + va), ap++;
+    }
+    while (bp < m) {
+        auto vb = b[(bp + 1) % m] - b[bp];
+        ps.push_back(ps.back() + vb), bp++;
+    }
+    return ps.pop_back(), ps;
+}

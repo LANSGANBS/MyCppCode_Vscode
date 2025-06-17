@@ -1,0 +1,37 @@
+template <class T, class Cmp = std::less<T>>
+class DeletableHeap {
+    std::priority_queue<T, std::vector<T>, Cmp> q_push, q_erase;
+    // Heap = q_push - q_erase
+
+    void check() {
+        while (!q_erase.empty() and q_push.top() == q_erase.top()) {
+            q_push.pop(), q_erase.pop();
+        }
+    }
+
+public:
+    void push(T x) {
+        q_push.push(x);
+    }
+
+    void erase(T x) {
+        q_erase.push(x);
+    }
+
+    T top() {
+        check();
+        return q_push.top();
+    }
+
+    void pop() {
+        check();
+        q_push.pop();
+    }
+
+    int size() {
+        int q_push_size = q_push.size();
+        int q_erase_size = q_erase.size();
+        assert(q_push_size >= q_erase_size);
+        return q_push_size - q_erase_size;
+    }
+};

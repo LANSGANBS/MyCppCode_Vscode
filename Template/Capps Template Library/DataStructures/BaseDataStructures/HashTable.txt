@@ -1,0 +1,70 @@
+using u64 = unsigned long long;
+
+template <class T, int Mod>
+class HashTable {
+    struct Iterator {
+        u64 *pKey;
+        T *pVal;
+
+        Iterator(u64 *pKey, T *pVal) : pKey{pKey}, pVal{pVal} {}
+
+        Iterator &operator++() {
+            ++pKey;
+            ++pVal;
+
+            return *this;
+        }
+
+        bool operator!=(Iterator it) const {
+            return pKey != it.pKey;
+        }
+
+        std::pair<u64, T> operator*() {
+            return std::make_pair(*pKey, *pVal);
+        }
+    };
+
+    Iterator begin() const {
+        return Iterator(to + 1, val + 1);
+    }
+
+    Iterator end() const {
+        return Iterator(to + tot + 1, val + tot + 1);
+    }
+
+    int hd[Mod], nt[Mod * 2], tot = 0;
+    u64 to[Mod * 2];
+    T val[Mod * 2];
+public:
+    void clear() {
+        for (int i = 1; i <= tot; i++) {
+            hd[to[i] % Mod] = 0;
+        }
+        tot = 0;
+    }
+
+    T operator()(u64 x) const {
+        int u = x % Mod;
+        for (int i = hd[u]; i > 0; i = nt[i]) {
+            if (to[i] == x) {
+                return val[i];
+            }
+        }
+        return T{};
+    }
+
+    T &operator[](u64 x) {
+        int u = x % Mod;
+        for (int i = hd[u]; i > 0; i = nt[i]) {
+            if (to[i] == x) {
+                return val[i];
+            }
+        }
+        to[++tot] = x;
+        nt[tot] = hd[u];
+        hd[u] = tot;
+        return val[tot] = T{};
+    }
+};
+
+HashTable<int, int(1e6) + 3> mp;

@@ -1,0 +1,88 @@
+// #include "onSeg"
+
+class InPoly {
+    // Seg c-d is Cross Seg a-b
+    bool isCross(Point a, Point b, Point c, Point d) const {
+        Vector ab = b - a, cd = d - c;
+        if (ab % cd == 0)
+            return 0; // 共线,寄
+        int r1 = sgn(ab % (c - a)), r2 = sgn(ab % (d - a));
+        int g1 = sgn(cd % (a - c)), g2 = sgn(cd % (b - c));
+        return !(r1 * r2 > 0 or r1 + r2 == -1 or g1 * g2 > 0);
+        // 真相交或者 c-d 贴着 a-b 左边
+    }
+
+public:
+    // a IN/OUT/ON Polygon
+    std::string operator()(Point a, const PS &ps) const {
+        int res = 0;
+        Vector b = {1 << 30, a.y};
+        for (int i = 0; i < ps.size(); i++) {
+            int j = (i + 1) % ps.size();
+            if (onSeg(a, ps[i], ps[j]))
+                return "ON";
+            res += isCross(a, b, ps[i], ps[j]);
+        }
+        return (res % 2 ? "IN" : "OUT");
+    }
+};
+const InPoly inPoly;
+
+// a IN/OUT/ON Convex
+std::string inConvex(Point a, const PS &ps) {
+    if (a == ps[0])
+        return "ON";
+    if (ps.size() <= 1)
+        return "OUT";
+    if (ps.size() == 2)
+        return onSeg(a, ps[0], ps[1]) ? "ON" : "OUT";
+    auto v = a - ps[0];
+    if ((ps[1] - ps[0]) % v < 0 or (ps.back() - ps[0]) % v > 0)
+        return "OUT";
+    int l = 1, r = ps.size() - 1;
+    while (l + 1 < r) {
+        auto mid = (l + r) / 2;
+        auto res = (ps[mid] - ps[0]) % v;
+        if (res == 0)
+            return (ps[mid] == a ? "ON" : (onSeg(a, ps[0], ps[mid]) ? "IN" : "OUT"));
+        (res > 0 ? l : r) = mid;
+    }
+    auto res = (ps[r] - ps[l]) % (a - ps[l]);
+    if (res == 0 or onSeg(a, ps[0], ps[l]) or onSeg(a, ps[0], ps[r]))
+        return "ON";
+    return (res > 0 ? "IN" : "OUT");
+}
+
+PS cutPoly(const PS &ps, Point a, Point b) {
+    // 返回多边形 ps 在有向直线 a->b 左边的部分
+    PS v;
+    auto c = b - a;
+    for (int i = 0; i < ps.size(); i++) {
+        int j = (i + 1) % ps.size();
+        auto cr1 = c % (ps[i] - a), cr2 = c % (ps[j] - a);
+        if (cr1 >= 0)
+            v.push_back(ps[i]);
+        if (sgn(cr1) * sgn(cr2) == -1)
+            v.push_back(cross(a, b, ps[i], ps[j]));
+    }
+    return v;
+}
+
+
+// find point of tangency
+class BinarySearchOnConvex {
+    PS vs;
+public:
+    constexpr BinarySearchOnConvex(const PS &ps) : vs(ps.size()) {
+        int n = size(ps);
+        for (int i = 0; i < n; i++) {
+            int j = (i + 1) % n;
+            vs[i] = ps[j] - ps[i];
+        }
+    }
+
+    int operator()(Point a) const {
+        int res = std::lower_bound(begin(vs), end(vs), a, polarCmp) - begin(vs);
+        return res % size(vs);
+    }
+};

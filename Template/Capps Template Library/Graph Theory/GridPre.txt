@@ -1,0 +1,48 @@
+// 网格单位元素, 网格一行Vector, 网格输出邻接表单位元素
+template <class Element, class Vector, class AdjEle>
+class GridPre {
+    const int h, w, n;
+
+    static constexpr int D = 4;
+    static constexpr int dx[D] = {0, 0, -1, 1};
+    static constexpr int dy[D] = {-1, 1, 0, 0};
+
+public:
+    std::vector<std::vector<AdjEle>> adj;
+    // std::vector<Element> a;
+    std::vector<int> reachableVertexSet;
+
+    GridPre(const std::vector<Vector> &grid, const std::set<Element> &reachableSet)
+        : h{grid.size()}, w{grid[0].size()}, n{h * w},
+          //   a(n),
+          adj(n) {
+
+        reachableVertexSet.reserve(n);
+
+        auto ok = [&](int x, int y) {
+            return 0 <= x and x < h and 0 <= y and y < w and reachableSet.count(grid[x][y]);
+        };
+
+        for (int i = 0; i < h; i++) {
+            for (int j = 0; j < w; j++) {
+                if (reachableSet.count(grid[i][j]) == 0) {
+                    continue;
+                }
+
+                int x = i * w + j;
+                // a[x] = grid[i][j];
+
+                reachableVertexSet.push_back(x);
+
+                for (int k = 0; k < D; k++) {
+                    int next_i = i + dx[k];
+                    int next_j = j + dy[k];
+
+                    if (ok(next_i, next_j)) {
+                        adj[x].emplace_back(next_i * w + next_j);
+                    }
+                }
+            }
+        }
+    }
+};

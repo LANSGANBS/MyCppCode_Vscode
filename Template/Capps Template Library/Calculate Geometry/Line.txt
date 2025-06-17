@@ -1,0 +1,58 @@
+// a on Seg b-c
+bool onSeg(Point a, Point b, Point c) {
+    b = b - a;
+    c = c - a;
+    return b % c == 0 and b * c <= 0;
+}
+
+// a disTo Line b-c
+Float disToLine(Point a, Point b, Point c) {
+    Point v1 = b - c, v2 = a - c;
+    return std::abs(v1 % v2) / std::sqrt(v1 * v1);
+}
+
+// a disTo Seg b-c
+Float disToSeg(Point a, Point b, Point c) {
+    if ((a - b) * (c - b) <= 0 or (a - c) * (b - c) <= 0) {
+        return std::min(dis(a, b), dis(a, c));
+    }
+    return disToLine(a, b, c);
+}
+
+// a project to Line b-c
+Point foot(Point a, Point b, Point c) {
+    Point u = a - b, v = c - b;
+    return b + (u * v) / (v * v) * v;
+}
+
+// a symmetry to Line b-c
+Point symmetry(Point a, Point b, Point c) {
+    Point ft = foot(a, b, c);
+    return 2 * ft - a;
+}
+
+// Line a-b cross Line c-d
+Point cross(Point a, Point b, Point c, Point d) {
+    Point v = c - d;
+    Float sa = v % (a - d), sb = (b - d) % v;
+    return sa / (sa + sb) * (b - a) + a;
+}
+
+// a-b 和 a-c 的夹角 signed
+Float getAngle(Point a, Point b, Point c) {
+    auto v1 = b - a, v2 = c - a;
+    return std::atan2(v1 % v2, v1 * v2); // ∠bac
+}
+
+// 对四个不同的点判断四点共圆
+// d在abc外接圆外return 1, 内return -1
+int inCircle(Point a, Point b, Point c, Point d) {
+    const Float PI = acosl(-1);
+    Float ag1 = getAngle(a, b, c), ag2 = getAngle(d, c, b);
+    auto sgn = [](Float x) { return x < 0 ? -1 : (x > 0); };
+    if (sgn(ag1) == sgn(ag2)) {
+        return sgn(PI - std::abs(ag1 + ag2));
+    } else {
+        return sgn(std::abs(ag1) - std::abs(ag2));
+    }
+}

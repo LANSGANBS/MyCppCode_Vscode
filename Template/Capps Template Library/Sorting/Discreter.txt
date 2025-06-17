@@ -1,0 +1,41 @@
+template <class T>
+struct Discreter {
+    std::vector<T> elementSet;
+
+    // 待离散化的元素集合a
+    Discreter(const std::vector<T> &a) : elementSet(a) {
+        std::sort(begin(elementSet), end(elementSet));
+        elementSet.erase(std::unique(begin(elementSet), end(elementSet)), end(elementSet));
+    }
+
+    std::vector<int> process(const std::vector<T> &a) const {
+        std::vector<int> discRes(a.size());
+
+        for (auto i = 0U; i < a.size(); i++) {
+            discRes[i] = query(a[i]);
+        }
+
+        return discRes;
+    }
+
+    int query(const T &x) const {
+        auto it = std::lower_bound(begin(elementSet), end(elementSet), x);
+        // assert(it != end(elementSet) and *it == x);
+
+        return it - begin(elementSet);
+    }
+
+    int queryUpperBound(const T &x) const {
+        auto it = std::upper_bound(begin(elementSet), end(elementSet), x);
+
+        return it - begin(elementSet);
+    }
+
+    T queryInv(int index) const {
+        return elementSet[index];
+    }
+
+    int size() const {
+        return elementSet.size();
+    }
+};

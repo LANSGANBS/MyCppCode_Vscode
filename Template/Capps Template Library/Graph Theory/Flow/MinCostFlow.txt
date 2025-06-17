@@ -1,0 +1,93 @@
+// 此费用流模板不支持费用负圈，不过费用负圈的情况极少，简单负边权可以支持
+template <class T, class F>
+class MCFGraph {
+    struct Edge {
+        int y;
+        T c;
+        F f;
+        Edge(int y, T c, F f) : y{y}, c{c}, f{f} {}
+    };
+
+    bool dijkstra(int s, int t) {
+        dis.assign(n, std::numeric_limits<F>::max());
+        pre.assign(n, -1);
+        using Pair = std::pair<F, int>;
+        std::priority_queue<Pair, std::vector<Pair>, std::greater<Pair>> q;
+        dis[s] = 0;
+        q.emplace(0, s);
+
+        while (!q.empty()) {
+            auto _pr = q.top();
+            F nearDist = _pr.first;
+            int x = _pr.second;
+            q.pop();
+
+            if (dis[x] < nearDist)
+                continue;
+            for (int i : g[x]) {
+                int y = adj[i].y;
+                T c = adj[i].c;
+                F f = adj[i].f;
+                if (c > 0 and dis[y] > nearDist + h[x] - h[y] + f) {
+                    dis[y] = nearDist + h[x] - h[y] + f;
+                    pre[y] = i;
+                    q.emplace(dis[y], y);
+                }
+            }
+        }
+        return dis[t] != std::numeric_limits<F>::max();
+    }
+public:
+    const int n;
+    std::vector<Edge> adj;
+    std::vector<std::vector<int>> g;
+    std::vector<F> h, dis;
+    std::vector<int> pre;
+    
+    MCFGraph(int n) : n(n), g(n) {}
+
+    void add(int x, int y, T cap, F fees) {
+        g[x].push_back(adj.size());
+        adj.emplace_back(y, cap, fees);
+        g[y].push_back(adj.size());
+        adj.emplace_back(x, 0, -fees);
+    }
+    std::pair<T, F> work(int s, int t) {
+        T flow = 0;
+        F cost = 0;
+        h.assign(n, 0);
+        while (dijkstra(s, t)) {
+            for (int i = 0; i < n; ++i)
+                h[i] += dis[i];
+            T aug = std::numeric_limits<T>::max();
+            for (int i = t; i != s; i = adj[pre[i] ^ 1].y)
+                aug = std::min(aug, adj[pre[i]].c);
+            for (int i = t; i != s; i = adj[pre[i] ^ 1].y) {
+                adj[pre[i]].c -= aug;
+                adj[pre[i] ^ 1].c += aug;
+            }
+            flow += aug;
+            cost += F(aug) * h[t];
+        }
+        return std::pair<T, F>(flow, cost);
+    }
+};
+
+// 最小费用可行流
+template <class T, class F>
+class MCFGraphOK {
+    MCFGraph<T, F> flow;
+    int superStr;
+    T totCap;
+public:
+    MCFGraphOK(int n) : flow(n + 1), superStr{n}, totCap{} {}
+    void add(int x, int y, T cap, F fees) {
+        flow.add(x, y, cap, fees);
+        totCap += cap;
+    }
+    std::pair<T, F> work(int s, int t) {
+        flow.add(superStr, s, totCap, 0);
+        flow.add(s, t, totCap, 0);
+        return flow.work(superStr, t);
+    }
+};

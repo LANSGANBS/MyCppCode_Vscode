@@ -1,0 +1,58 @@
+class RingTree {
+public:
+    std::vector<std::vector<int>> g;
+    std::vector<int> ring;
+    // DSU dsu;
+
+    RingTree(const std::vector<std::vector<int>> &adj)
+        : g(adj.size())
+    //   dsu(adj.size())
+    {
+        const int n = adj.size();
+
+        std::vector<int> deg(n, 0);
+        std::queue<int> q;
+        for (int x = 0; x < n; x++) {
+            deg[x] = adj[x].size();
+            if (deg[x] == 1) {
+                q.push(x);
+            }
+        }
+
+        while (!q.empty()) {
+            int x = q.front();
+            q.pop();
+
+            for (int y : adj[x]) {
+                deg[y] -= 1;
+                if (deg[y] == 1) {
+                    q.push(y);
+                }
+                if (deg[y] >= 1) {
+                    g[y].push_back(x);
+                    // dsu.Union(y, x);
+                }
+            }
+        }
+
+        int x = 0;
+        while (deg[x] < 2) {
+            x += 1;
+        }
+        assert(x < n and deg[x] == 2);
+
+        do {
+            ring.push_back(x);
+            int z = -1;
+            for (int y : adj[x]) {
+                if (deg[y] == 2 and y != x) {
+                    deg[x] -= 1;
+                    deg[y] -= 1;
+                    z = y;
+                    break;
+                }
+            }
+            x = z;
+        } while (x >= 0);
+    }
+};

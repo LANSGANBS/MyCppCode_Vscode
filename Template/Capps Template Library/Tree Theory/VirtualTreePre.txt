@@ -1,0 +1,35 @@
+// T:原树边, G:虚树边
+template <class T, class G>
+class VirtualTreePre {
+    const std::function<bool(int, int)> dfnCmp = [&](int x, int y) {
+        return pre.dfn[x] < pre.dfn[y];
+    };
+
+public:
+    const TreePre<T> pre;
+    std::vector<std::vector<G>> vt;
+
+    VirtualTreePre(const std::vector<std::vector<T>> &adj, int root)
+        : pre(adj, root), vt(adj.size()) {}
+
+    // 虚树存在vt, 返回vt根节点
+    int build(std::vector<int> a) {
+        std::sort(a.begin(), a.end(), dfnCmp);
+        for (int i = (int)a.size() - 1; i; i--) {
+            a.push_back(pre.getLca(a[i - 1], a[i]));
+        }
+        std::sort(a.begin(), a.end(), dfnCmp);
+        a.erase(std::unique(a.begin(), a.end()), a.end());
+
+        for (int x : a) {
+            vt[x].clear();
+        }
+
+        for (auto i = 1U; i < a.size(); i++) {
+            int lca = pre.getLca(a[i - 1], a[i]);
+            vt[lca].emplace_back(a[i], pre.dep[a[i]] - pre.dep[lca]);
+        }
+
+        return a.front();
+    }
+};
