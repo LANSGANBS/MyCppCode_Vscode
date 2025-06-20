@@ -1,344 +1,192 @@
-#include <bits/extc++.h>
-#include <bits/stdc++.h>
+#include <algorithm>
+#include <ctime>
+#include <iomanip>
+#include <iostream>
+#include <random>
+#include <sstream>
+#include <string>
+#include <vector>
 using namespace std;
-using namespace __gnu_pbds;
-#define endl '\n'
-#define ture true
-#define flase false
-#define pow power
-#define all(x) begin(x), end(x)
-#define mem(a, x) memset(a, x, sizeof(a))
-#define sz(x) (int)x.size()
-#define lowbit(x) (x & -x)
-#define time(a, b) (abs((b - a) / CLOCKS_PER_SEC))
-// double a = clock();
-#define pb push_back
-#define EPS 1e-7
-#define ll long long
-#define i128 __int128
-#define fr first
-#define sc second
-#define tcT template <class T
-#define tcTU tcT, class U
-#define tcTV tcT, class... Ts
 
-void unsyncIO() { cin.tie(0)->sync_with_stdio(0); }
-void setPrec() { cout << fixed << setprecision(15); }
-void setIO() { unsyncIO(), setPrec(); }
-
-tcT > T gcd(const T &a, const T &b) { return b ? gcd(b, a % b) : a; }
-tcTU > T div(T a, T b, U flag) {
-  if (flag) {
-    return a / b + ((a ^ b) > 0 && a % b);
-  } else {
-    return a / b - ((a ^ b) < 0 && a % b);
+// 计算给定顺序的磁道移动距离，同时记录经过的磁道序列。
+// currentTrack 表示起始磁道号，tracks 表示接下来的磁道访问顺序。
+pair<int, vector<int>> calculateMovement(const vector<int>& tracks,
+                                         int currentTrack) {
+  int totalMovement = 0;
+  vector<int> visitedTracks;
+  visitedTracks.push_back(currentTrack);
+  for (int track : tracks) {
+    totalMovement += abs(currentTrack - track);
+    currentTrack = track;
+    visitedTracks.push_back(currentTrack);
   }
+  return {totalMovement, visitedTracks};
 }
 
-tcT > using V = vector<T>;
-tcTU > using PR = pair<T, U>;
-tcTU > using MP = map<T, U>;
-tcTU > using VP = vector<pair<T, U>>;
-tcT > using pql =
-    __gnu_pbds::priority_queue<T, less<T>, __gnu_pbds::pairing_heap_tag>;
-tcT > using pqg =
-    __gnu_pbds::priority_queue<T, greater<T>, __gnu_pbds::pairing_heap_tag>;
-
-tcTU > istream &operator>>(istream &in, pair<T, U> &a) {
-  return in >> a.first >> a.second;
+// FIFO算法：按照给定顺序访问磁道
+pair<int, vector<int>> fifo(const vector<int>& tracks, int currentTrack) {
+  return calculateMovement(tracks, currentTrack);
 }
 
-tcT > istream &operator>>(istream &in, vector<T> &a) {
-  for (auto &x : a) {
-    in >> x;
-  }
-  return in;
-}
-
-tcTU > ostream &operator<<(ostream &out, const pair<T, U> &a) {
-  return out << a.first << ' ' << a.second;
-}
-
-tcTU > ostream &operator<<(ostream &out, const vector<pair<T, U>> &a) {
-  for (auto &x : a) {
-    out << x << endl;
-  }
-  return out;
-}
-
-tcT > ostream &operator<<(ostream &out, const vector<T> &a) {
-  int n = a.size();
-  if (!n) {
-    return out;
-  }
-  out << a[0];
-  for (int i = 1; i < n; i++) {
-    out << ' ' << a[i];
-  }
-  return out;
-}
-
-std::ostream &operator<<(std::ostream &os, i128 n) {
-  std::string s;
-  while (n) {
-    s += '0' + n % 10;
-    n /= 10;
-  }
-  std::reverse(s.begin(), s.end());
-  return os << s;
-}
-
-tcTV > bool ckmin(T &a, const T &b, const Ts &...args) {
-  bool changed = false;
-  if (b < a) {
-    a = b;
-    changed = true;
-  }
-  (void)std::initializer_list<int>{
-      ((args < a ? (a = args, changed = true) : 0), 0)...};
-  return changed;
-}
-
-tcTV > bool ckmax(T &a, const T &b, const Ts &...args) {
-  bool changed = false;
-  if (a < b) {
-    a = b;
-    changed = true;
-  }
-  (void)std::initializer_list<int>{
-      ((a < args ? (a = args, changed = true) : 0), 0)...};
-  return changed;
-}
-
-tcT > void remDup(vector<T> &v) {
-  sort(all(v));
-  v.erase(unique(all(v)), end(v));
-}
-
-tcTU > void erase(T &t, const U &u) {
-  auto it = t.find(u);
-  assert(it != end(t));
-  t.erase(it);
-}
-
-tcTU > T fstTrue(T lo, T hi, U f) {
-  hi++;
-  assert(lo <= hi);
-  while (lo < hi) {
-    T mid = lo + (hi - lo) / 2;
-    f(mid) ? hi = mid : lo = mid + 1;
-  }
-  return lo;
-}
-
-tcTU > T lstTrue(T lo, T hi, U f) {
-  lo--;
-  assert(lo <= hi);
-  while (lo < hi) {
-    T mid = lo + (hi - lo + 1) / 2;
-    f(mid) ? lo = mid : hi = mid - 1;
-  }
-  return lo;
-}
-
-constexpr int modulo[] = {998244353, 1000000007};
-constexpr int mod = modulo[0];
-constexpr int inf = 0x7fffffff;
-constexpr int N = 1.01e6;
-constexpr int M = 2.01e3;
-
-#ifdef LOCAL
-#include <C:/Users/70510/Desktop/Others/algo/debug.h>
-#else
-#define debug(...) 42
-#endif
-
-using i64 = long long;
-
-template <class T>
-constexpr T mypow(T n, i64 k) {
-  T r = 1;
-  for (; k; k /= 2, n *= n) {
-    if (k % 2) {
-      r *= n;
+// SSTF算法：每次选择距离当前磁道最近的磁道进行访问
+pair<int, vector<int>> sstf(const vector<int>& tracks, int currentTrack) {
+  vector<int> remaining = tracks;
+  vector<int> visitedTracks;
+  visitedTracks.push_back(currentTrack);
+  int totalMovement = 0;
+  while (!remaining.empty()) {
+    int closestIndex = 0;
+    int closestDistance = abs(currentTrack - remaining[0]);
+    for (int i = 0; i < (int)remaining.size(); i++) {
+      int distance = abs(currentTrack - remaining[i]);
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        closestIndex = i;
+      }
     }
+    totalMovement += closestDistance;
+    currentTrack = remaining[closestIndex];
+    visitedTracks.push_back(currentTrack);
+    remaining.erase(remaining.begin() + closestIndex);
   }
-  return r;
+  return {totalMovement, visitedTracks};
 }
 
-template <int MOD>
-struct Zmod {
-  int x;
-  Zmod(int x = 0) : x(norm(x % MOD)) {}
-  Zmod(i64 x) : x(norm(x % MOD)) {}
-
-  constexpr int norm(int x) const {
-    if (x < 0) {
-      x += MOD;
-    }
-    if (x >= MOD) {
-      x -= MOD;
-    }
-    return x;
+// SCAN算法：先向一个方向扫描，再折返扫描另一侧（先访问大于等于起始磁道的，再逆向访问低于起始磁道的）
+pair<int, vector<int>> scan(const vector<int>& tracks, int currentTrack) {
+  vector<int> sorted = tracks;
+  sort(sorted.begin(), sorted.end());
+  vector<int> left, right;
+  for (int t : sorted) {
+    if (t < currentTrack)
+      left.push_back(t);
+    else
+      right.push_back(t);
   }
-
-  constexpr int val() const { return x; }
-
-  constexpr Zmod operator-() const { return Zmod(norm(MOD - x)); }
-
-  constexpr Zmod inv() const {
-    assert(x != 0);
-    return mypow(*this, MOD - 2);
-  }
-
-  friend constexpr auto &operator>>(istream &in, Zmod &j) {
-    int v;
-    in >> v;
-    j = Zmod(v);
-    return in;
-  }
-
-  friend constexpr auto &operator<<(ostream &o, const Zmod &j) {
-    return o << j.val();
-  }
-
-  constexpr Zmod &operator++() {
-    x = norm(x + 1);
-    return *this;
-  }
-
-  constexpr Zmod &operator--() {
-    x = norm(x - 1);
-    return *this;
-  }
-
-  constexpr Zmod operator++(int) {
-    Zmod tmp = *this;
-    ++(*this);
-    return tmp;
-  }
-
-  constexpr Zmod operator--(int) {
-    Zmod tmp = *this;
-    --(*this);
-    return tmp;
-  }
-
-  constexpr Zmod &operator+=(const Zmod &i) {
-    x = norm(x + i.x);
-    return *this;
-  }
-
-  constexpr Zmod &operator-=(const Zmod &i) {
-    x = norm(x - i.x);
-    return *this;
-  }
-
-  constexpr Zmod &operator*=(const Zmod &i) {
-    x = i64(x) * i.x % MOD;
-    return *this;
-  }
-
-  constexpr Zmod &operator/=(const Zmod &i) { return *this *= i.inv(); }
-
-  constexpr Zmod &operator%=(const int &i) {
-    x %= i;
-    return *this;
-  }
-
-  friend constexpr Zmod operator+(const Zmod i, const Zmod j) {
-    return Zmod(i) += j;
-  }
-
-  friend constexpr Zmod operator-(const Zmod i, const Zmod j) {
-    return Zmod(i) -= j;
-  }
-
-  friend constexpr Zmod operator*(const Zmod i, const Zmod j) {
-    return Zmod(i) *= j;
-  }
-
-  friend constexpr Zmod operator/(const Zmod i, const Zmod j) {
-    return Zmod(i) /= j;
-  }
-
-  friend constexpr Zmod operator%(const Zmod i, const int j) {
-    return Zmod(i) %= j;
-  }
-
-  friend constexpr bool operator==(const Zmod i, const Zmod j) {
-    return i.val() == j.val();
-  }
-
-  friend constexpr bool operator!=(const Zmod i, const Zmod j) {
-    return i.val() != j.val();
-  }
-
-  friend constexpr bool operator<(const Zmod i, const Zmod j) {
-    return i.val() < j.val();
-  }
-
-  friend constexpr bool operator>(const Zmod i, const Zmod j) {
-    return i.val() > j.val();
-  }
-};
-
-constexpr int MOD[] = {1000000007, 1000000007};
-using Z = Zmod<MOD[0]>;
-
-Z power(int n) { return mypow(Z(2), n); }
-
-struct Comb {
-  int n;
-  vector<Z> _fac, _inv;
-
-  Comb() : _fac{1}, _inv{0} {}
-  Comb(int n) : Comb() { init(n); }
-  void init(int m) {
-    if (m <= n) return;
-    _fac.resize(m + 1);
-    _inv.resize(m + 1);
-    for (int i = n + 1; i <= m; i++) {
-      _fac[i] = _fac[i - 1] * i;
-    }
-    _inv[m] = _fac[m].inv();
-    for (int i = m; i > n; i--) {
-      _inv[i - 1] = _inv[i] * i;
-    }
-    n = m;
-  }
-  Z fac(int x) {
-    if (x > n) init(x);
-    return _fac[x];
-  }
-  Z inv(int x) {
-    if (x > n) init(x);
-    return _inv[x];
-  }
-  Z C(int x, int y) {
-    if (x < 0 || y < 0 || x < y) return 0;
-    return fac(x) * inv(y) * inv(x - y);
-  }
-  Z P(int x, int y) {
-    if (x < 0 || y < 0 || x < y) return 0;
-    return fac(x) * inv(x - y);
-  }
-} comb(1 << 21);
-
-// eg :
-
-void solve() {
-  Comb a;
-  Z ans = a.C(100, 7);
-  cout << ans << endl;
+  // 先访问右侧，再逆转左侧后访问
+  vector<int> visitOrder = right;
+  reverse(left.begin(), left.end());
+  visitOrder.insert(visitOrder.end(), left.begin(), left.end());
+  return calculateMovement(visitOrder, currentTrack);
 }
 
-signed main() {
-  setIO();
-  int tt = 1;
-  cin >> tt;
-  while (tt--) {
-    solve();
+// C-SCAN算法：单向扫描，扫描到端后返回另一端接着扫描
+pair<int, vector<int>> cscan(const vector<int>& tracks, int currentTrack) {
+  vector<int> sorted = tracks;
+  sort(sorted.begin(), sorted.end());
+  vector<int> left, right;
+  for (int t : sorted) {
+    if (t < currentTrack)
+      left.push_back(t);
+    else
+      right.push_back(t);
+  }
+  // 先访问右侧，再访问左侧（模拟回到起点的动作忽略回退距离）
+  vector<int> visitOrder = right;
+  visitOrder.insert(visitOrder.end(), left.begin(), left.end());
+  return calculateMovement(visitOrder, currentTrack);
+}
+
+// FSCAN算法：本题中与SCAN的实现一致
+pair<int, vector<int>> fscan(const vector<int>& tracks, int currentTrack) {
+  return scan(tracks, currentTrack);
+}
+
+int main() {
+  // 使用随机数生成器生成磁道号。范围为 [0, 199]
+  mt19937 rng((unsigned)time(nullptr));
+  uniform_int_distribution<int> dist(0, 199);
+
+  int numTracks;
+  cout << "请输入要处理的磁道数: ";
+  cin >> numTracks;
+  vector<int> tracks(numTracks);
+  for (int i = 0; i < numTracks; i++) {
+    tracks[i] = dist(rng);
+  }
+  cout << "随机生成的磁道号为: ";
+  for (int t : tracks) {
+    cout << t << " ";
+  }
+  cout << "\n";
+
+  while (true) {
+    cout << "\n请选择算法:\n";
+    cout << "1. FIFO\n";
+    cout << "2. SSTF\n";
+    cout << "3. SCAN\n";
+    cout << "4. C-SCAN\n";
+    cout << "5. FSCAN\n";
+    cout << "请输入选择 (1-5): ";
+    int choice;
+    cin >> choice;
+
+    cout << "请输入当前磁道号: ";
+    int currentTrack;
+    cin >> currentTrack;
+
+    vector<int> sortedTracks = tracks;  // 拷贝原始磁道号
+    // 针对不同选择进行预处理排序
+    if (choice == 1) {
+      // FIFO：按照原始顺序
+      // sortedTracks 已经赋值，无需排序
+    } else if (choice == 2) {
+      // SSTF：按距离当前磁道排序，距离较近的靠前
+      sort(sortedTracks.begin(), sortedTracks.end(),
+           [currentTrack](int a, int b) {
+             return abs(a - currentTrack) < abs(b - currentTrack);
+           });
+    } else if (choice >= 3 && choice <= 5) {
+      // SCAN, C-SCAN, FSCAN：升序排序
+      sort(sortedTracks.begin(), sortedTracks.end());
+    } else {
+      cout << "无效选择，请重新输入。\n";
+      continue;
+    }
+
+    cout << "排序后的磁道分布: ";
+    for (int t : sortedTracks) {
+      cout << t << " ";
+    }
+    cout << "\n";
+
+    pair<int, vector<int>> res;
+    switch (choice) {
+      case 1:
+        res = fifo(sortedTracks, currentTrack);
+        break;
+      case 2:
+        res = sstf(sortedTracks, currentTrack);
+        break;
+      case 3:
+        res = scan(sortedTracks, currentTrack);
+        break;
+      case 4:
+        res = cscan(sortedTracks, currentTrack);
+        break;
+      case 5:
+        res = fscan(sortedTracks, currentTrack);
+        break;
+      default:
+        cout << "无效选择，请重新输入。\n";
+        continue;
+    }
+
+    int totalMovement = res.first;
+    // 访问的磁道数包含起始点
+    int visitedCount = res.second.size() - 1;  // 中间移动次数
+    double avgMovement =
+        visitedCount > 0 ? (double)totalMovement / visitedCount : 0.0;
+
+    cout << "移动的总磁道数: " << totalMovement << "\n";
+    cout << "经过的总磁道数: " << visitedCount << "\n";
+    cout << "移动的平均磁道数: " << fixed << setprecision(2) << avgMovement
+         << "\n";
+
+    cout << "\n是否再次选择算法? (y/n): ";
+    string answer;
+    cin >> answer;
+    if (answer != "y" && answer != "Y") break;
   }
   return 0;
 }
